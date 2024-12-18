@@ -1129,33 +1129,6 @@
       option: Office
     action: input_select.select_option
   mode: single
-- alias: Start Vacuum When Everyone is Away
-  description: Start vacuum when Madelyn, Kathryn, and Graham are not home
-  trigger:
-  - platform: state
-    entity_id:
-    - device_tracker.madelyn_iphone
-    - device_tracker.kathryn_iphone
-    - device_tracker.graham_iphone
-    to: not_home
-  condition:
-  - condition: state
-    entity_id: device_tracker.madelyn_iphone
-    state: not_home
-  - condition: state
-    entity_id: device_tracker.kathryn_iphone
-    state: not_home
-  - condition: state
-    entity_id: device_tracker.graham_iphone
-    state: not_home
-  action: simple_wyze_.vac.sweep_rooms
-  data:
-    entity_id: vacuum.first_floor_vacuum
-    rooms:
-    - switch.swv_office
-    - switch.swv_kitchen
-    - switch.swv_kitchentable
-  id: 4e0405e9cdff4690a54630034100e93e
 - id: '1733889094747'
   alias: Laurel Vanity Off at Night
   description: ''
@@ -1179,4 +1152,25 @@
     data: {}
     target:
       entity_id: switch.laurel_vanity
+  mode: single
+- id: "1692840669123"
+  alias: Start Vacuum When Everyone is Away
+  description: ""
+  trigger:
+    - platform: state
+      entity_id: group.family
+      to: not_home
+      for:
+        hours: 0
+        minutes: 10
+        seconds: 0
+  condition: []
+  action:
+    - service: vacuum.start
+      data:
+        entity_id: vacuum.first_floor_vacuum
+        rooms:
+          - switch.swv_office
+          - switch.swv_kitchen
+          - switch.swv_kitchentable
   mode: single

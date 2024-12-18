@@ -1,0 +1,17 @@
+name: Validate Configuration
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'  # Run daily at midnight
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: home-assistant/actions/hassfest@master
+      - uses: home-assistant/actions/ha-config-check@master
+        with:
+          path: '/opt/homeassistant'

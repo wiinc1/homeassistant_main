@@ -1,0 +1,131 @@
+- id: 'low_level_notifications'
+  alias: Low Level Notifications
+  description: 'Monitors battery levels and other consumables'
+  trigger:
+    # Battery level triggers
+    - platform: numeric_state
+      entity_id:
+        - sensor.zigbee_battery
+        # Door/Window Sensors
+        - sensor.grahamsroomwindow_battery
+        - sensor.laurelroomwindow_battery
+        - sensor.madelynroomwindow_battery
+        - sensor.basementfamilyroomwindow_battery
+        - sensor.basementkitchenwindow_battery
+        - sensor.guestbedroomwindow_battery
+        - sensor.officewindow_battery
+        # Motion Sensors
+        - sensor.lumi_lumi_motion_ac02_battery
+        - sensor.southeast_corner_battery
+        - sensor.backyard_east_battery
+        - sensor.backyard_west_battery
+        # Water Leak Sensors
+        - sensor.lumi_lumi_sensor_wleak_aq1_battery
+        - sensor.lumi_lumi_sensor_wleak_aq1_battery_2
+      below: 40
+    # Printer level trigger
+    - platform: numeric_state
+      entity_id: sensor.printer_levels
+      below: 40
+    # Water leak triggers
+    - platform: state
+      entity_id:
+        - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture
+        - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_2
+      to: 'on'
+  action:
+    - variables:
+        notification_data: >
+          {% set messages = {
+            # Battery notifications
+            'sensor.zigbee_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'ZigBee device battery is below 40%'
+            },
+            'sensor.grahamsroomwindow_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Graham\'s room window sensor battery is below 40%'
+            },
+            'sensor.laurelroomwindow_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Laurel\'s room window sensor battery is below 40%'
+            },
+            'sensor.madelynroomwindow_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Madelyn\'s room window sensor battery is below 40%'
+            },
+            'sensor.basementfamilyroomwindow_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Basement family room window sensor battery is below 40%'
+            },
+            'sensor.basementkitchenwindow_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Basement kitchen window sensor battery is below 40%'
+            },
+            'sensor.guestbedroomwindow_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Guest bedroom window sensor battery is below 40%'
+            },
+            'sensor.officewindow_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Office window sensor battery is below 40%'
+            },
+            'sensor.lumi_lumi_motion_ac02_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Motion sensor battery is below 40%'
+            },
+            'sensor.southeast_corner_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Southeast corner motion sensor battery is below 40%'
+            },
+            'sensor.backyard_east_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Backyard east motion sensor battery is below 40%'
+            },
+            'sensor.backyard_west_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Backyard west motion sensor battery is below 40%'
+            },
+            'sensor.lumi_lumi_sensor_wleak_aq1_battery': {
+              'title': 'Low Battery Alert',
+              'message': 'Water leak sensor (Graham\'s bathroom) battery is below 40%'
+            },
+            'sensor.lumi_lumi_sensor_wleak_aq1_battery_2': {
+              'title': 'Low Battery Alert',
+              'message': 'Water leak sensor (Kitchen) battery is below 40%'
+            },
+            # Other level notifications
+            'sensor.printer_levels': {
+              'title': 'Low Printer Level',
+              'message': 'Printer level is below 40%'
+            },
+            'binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture': {
+              'title': 'Water Leak Detected!',
+              'message': 'WATER LEAKING IN GRAHAM\'S BATHROOM'
+            },
+            'binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_2': {
+              'title': 'Water Leak Detected!',
+              'message': 'WATER LEAKING IN KITCHEN DISHWASHER'
+            }
+          } %}
+          {{ messages[trigger.entity_id] }}
+    # Phone notification
+    - service: notify.mobile_app_brians_iphone
+      data:
+        title: "{{ notification_data.title }}"
+        message: "{{ notification_data.message }}"
+    # Alexa announcement for water leaks only
+    - if:
+        condition: template
+        value_template: >
+          {{ trigger.entity_id.endswith('moisture') or trigger.entity_id.endswith('moisture_2') }}
+      then:
+        - service: notify.alexa_media
+          data:
+            target:
+              - media_player.graham_echo
+              - media_player.kitchen_echo_dot
+              - media_player.laurel_echo
+              - media_player.madelyn_echo
+            message: "{{ notification_data.message }}"
+  mode: single

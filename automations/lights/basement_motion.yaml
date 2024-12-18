@@ -1,0 +1,36 @@
+- id: '1696381624866'
+  alias: Lights - Basement Motion
+  description: ''
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.lumi_lumi_motion_ac02_motion
+      to: 'on'
+      from:
+  condition:
+    - condition: not
+      conditions:
+        - condition: device
+          device_id: 107cf956dc248c791c8282952a1ef49b
+          domain: media_player
+          entity_id: 66ccbb628ab2804eea6bd8c54e7449f5
+          type: is_playing
+  action:
+    - service: homeassistant.turn_on
+      data: {}
+      target:
+        entity_id:
+          - light.basement_familyroom_light
+          - light.basementhallwaylight
+    - if:
+        - condition: state
+          entity_id: binary_sensor.lumi_lumi_motion_ac02_occupancy
+          state: 'off'
+      then:
+        - service: homeassistant.turn_off
+          data: {}
+          target:
+            entity_id:
+              - light.basement_familyroom_light
+              - light.basementhallwaylight
+  mode: single

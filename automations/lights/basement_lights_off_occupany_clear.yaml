@@ -1,0 +1,18 @@
+- id: '1696433765543'
+  alias: Lights - Occupancy Clear in Basement Turn Off Lights
+  description: ''
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.lumi_lumi_motion_ac02_occupancy
+      from:
+      to: 'off'
+  condition: []
+  action:
+    - service: homeassistant.turn_off
+      data: {}
+      target:
+        entity_id:
+          - light.basementhallwaylight
+          - light.basement_familyroom_light
+  mode: single

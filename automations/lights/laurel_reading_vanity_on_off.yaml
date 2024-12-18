@@ -1,0 +1,24 @@
+- id: '1733889094747'
+  alias: Laurel Vanity Off at Night
+  description: ''
+  triggers:
+    - trigger: time
+      at: '21:30:00'
+  conditions: []
+  actions:
+    - action: switch.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: switch.laurel_vanity
+    - delay:
+        hours: 0
+        minutes: 30
+        seconds: 0
+        milliseconds: 0
+    - action: switch.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: switch.laurel_vanity
+  mode: single

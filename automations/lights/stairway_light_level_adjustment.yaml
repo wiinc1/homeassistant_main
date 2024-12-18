@@ -1,0 +1,24 @@
+- id: '1698545646536'
+  alias: Light Level - Stairway Light Turns On When Light Level is Low
+  description: ''
+  trigger:
+    - platform: numeric_state
+      entity_id:
+        - sensor.lumi_lumi_sensor_motion_aq2_illuminance_3
+      below: 10
+  condition:
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: light.lightstairway
+          state: 'off'
+        - condition: time
+          after: 08:00:00
+          before: '20:00:00'
+  action:
+    - service: light.turn_on
+      data:
+        brightness_pct: 100
+      target:
+        entity_id: light.lightstairway
+  mode: single

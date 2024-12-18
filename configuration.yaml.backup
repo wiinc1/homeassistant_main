@@ -10,7 +10,7 @@ homeassistant:
 
 # Split configurations into separate files
 default_config:
-automation: !include_dir_merge_list automations.yaml
+automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 group: !include groups.yaml

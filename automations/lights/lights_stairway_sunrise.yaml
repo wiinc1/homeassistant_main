@@ -1,0 +1,14 @@
+- id: '1695769395207'
+  alias: Stairway Light Off At Sunrise
+  description: ''
+  trigger:
+    - platform: sun
+      event: sunrise
+      offset: 0
+  condition: []
+  action:
+    - service: light.turn_off
+      data: {}
+      target:
+        device_id: 0756f6be0b3c6aa8481d56e0586c5f7e
+  mode: single

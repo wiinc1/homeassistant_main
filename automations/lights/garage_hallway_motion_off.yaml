@@ -1,0 +1,22 @@
+- id: '1695860913281'  # new unique ID
+  alias: Light - Garage Hallway Motion Turns Light Off
+  description: 'Turns off garage hallway and laundry room lights when no motion is detected for 10 minutes'
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.lumi_lumi_sensor_motion_aq2_motion
+        - binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
+        - binary_sensor.lumi_lumi_motion_ac02_motion_2
+      to: 'off'
+      for: '00:10:00'  # 10 minutes
+  condition: []
+  action:
+    - service: light.turn_off
+      target:
+        entity_id: light.garage_hallway_2
+      data:
+        transition: 1
+    - service: switch.turn_off
+      target:
+        entity_id: switch.laundryroom
+  mode: single

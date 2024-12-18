@@ -1,0 +1,8 @@
+- platform: amazon_polly
+  aws_access_key_id: !secret aws_access_key_id
+  aws_secret_access_key: !secret aws_secret_access_key
+  region_name: us-east-1  # Change this to your AWS region
+  voice: Joanna  # You can choose different voices
+  
+- platform: alexa
+  # This will use the Alexa devices directly for TTS

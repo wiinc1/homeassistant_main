@@ -1,0 +1,29 @@
+- id: '1695857031040'
+  alias: Security - Motion-Activated Sprinkler (Fire Pit Area)
+  description: Activates sprinkler in fire pit area when motion is detected overnight
+  trigger:
+    - platform: state
+      entity_id: switch.backyard_west_detections_motion
+      to: 'on'
+      from: 'off'
+  condition:
+    - condition: time
+      after: '23:00:00'
+      before: '05:00:00'
+    - condition: state 
+      entity_id: switch.backyard_outside_perimeter_fire_pit
+      state: 'off'
+      for: 
+        minutes: 5
+  action:
+    - service: rachio.start_multiple_zone_schedule
+      data:
+        duration: 3
+        target:
+          entity_id: switch.backyard_outside_perimeter_fire_pit
+    - delay:
+        minutes: 5
+    - service: rachio.stop_watering
+      target:
+        entity_id: switch.backyard_outside_perimeter_fire_pit
+  mode: single

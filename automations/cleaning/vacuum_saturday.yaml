@@ -1,0 +1,23 @@
+- id: '1695855658006'
+  alias: Vacuum - Saturday Master Suite & Family Room
+  description: 'Runs vacuum in master suite and family room areas on Saturday afternoons'
+  trigger:
+    - platform: time
+      at: '14:00:00'
+  condition:
+    - condition: time
+      weekday:
+        - sat
+    - condition: time
+      after: '06:00:00'
+      before: '23:00:00'
+  action:
+    - service: simple_wyze_vac.sweep_rooms
+      data:
+        entity_id: vacuum.first_floor_vacuum
+        rooms:
+          - switch.swv_masterbathroom
+          - switch.swv_masterbedroom
+          - switch.swv_familyroom_2
+          - switch.swv_entryway
+  mode: single

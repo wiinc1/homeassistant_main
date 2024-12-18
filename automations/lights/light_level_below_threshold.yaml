@@ -1,0 +1,57 @@
+- id: '1695769495712'
+  alias: Lights - Evening Activation (Sunset or Low Light)
+  description: 'Turns on house lights when natural light is low or at sunset'
+  
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.lumi_lumi_sensor_motion_aq2_illuminance_3
+      below: 15
+      id: low_light
+    - platform: sun
+      event: sunset
+      offset: 0
+      id: sunset
+  
+  condition:
+    # Optional: Add conditions like:
+    # - Only run if someone is home
+    - condition: state
+      entity_id: group.family
+      state: 'home'
+    # - Don't run if TV is on
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: media_player.lg_webos_tv_un7300aud
+          state: 'playing'
+  
+  action:
+    # Group all lights for easier management
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.kitchen_spotlight
+          - light.lights_china_cabinet
+          - light.lights_familyroom_mantle
+          - light.familyroomlamp
+          - light.masterlampbrian
+          - light.masterlampkathryn
+      data:
+        brightness_pct: >
+          {% if trigger.id == 'low_light' %}
+          {{ 100 - (states('sensor.lumi_lumi_sensor_motion_aq2_illuminance_3') | float) }}
+          {% else %}
+          100
+          {% endif %}
+        transition: 5  # Smooth transition over 5 seconds
+    
+    # Separate switches since they don't support brightness
+    - service: switch.turn_on
+      target:
+        entity_id: switch.christmas_tree_lights
+  
+  mode: single
+  
+  variables:
+    LIGHT_THRESHOLD: 15
+    MAX_BRIGHTNESS: 100

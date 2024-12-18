@@ -1,0 +1,24 @@
+- id: '1695856290902'
+  alias: Vacuum - Sunday Evening Clean
+  description: 'Runs vacuum in common areas on Sunday evenings'
+  trigger:
+    - platform: time
+      at: '18:00:00'
+  condition:
+    - condition: time
+      weekday:
+        - sun
+    - condition: time
+      after: '08:00:00'
+      before: '23:00:00'
+  action:
+    - service: simple_wyze_vac.sweep_rooms
+      data:
+        entity_id: vacuum.first_floor_vacuum
+        rooms:
+          - switch.swv_entryway
+          - switch.swv_office
+          - switch.swv_laundry
+          - switch.swv_kitchen
+          - switch.swv_kitchentable
+  mode: single

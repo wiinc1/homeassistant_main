@@ -1,0 +1,48 @@
+- id: 'security_notifications'
+  alias: Security Notifications
+  description: 'Handles security-related notifications (motion, etc)'
+  trigger:
+    - platform: state
+      entity_id:
+        - switch.doorbell_detections_person
+        - switch.front_porch_detections_motion
+        - switch.backyard_east_detections_motion
+        - binary_sensor.southeast_corner_motion
+        - binary_sensor.backyard_east_motion
+        - binary_sensor.backyard_west_motion
+        - binary_sensor.west_side_motion
+        - camera.west_side_high
+      to: 'on'
+  action:
+    - variables:
+        location: >
+          {% set locations = {
+            'switch.doorbell_detections_person': "Front Door",
+            'switch.front_porch_detections_motion': "Front Porch",
+            'switch.backyard_east_detections_motion': "Backyard East",
+            'binary_sensor.southeast_corner_motion': "Southeast Corner",
+            'binary_sensor.backyard_east_motion': "Backyard East",
+            'binary_sensor.backyard_west_motion': "Backyard West",
+            'binary_sensor.west_side_motion': "West Side",
+            'camera.west_side_high': "West Side High Camera"
+          } %}
+          {{ locations[trigger.entity_id] }}
+    - service: notify.mobile_app_brians_iphone
+      data:
+        message: "Motion Detected: {{ location }}"
+        title: "Security Alert"
+    # Optional: Add condition for night-time only notifications
+    - if:
+        condition: time
+        after: '23:00:00'
+        before: '06:00:00'
+      then:
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.lights_china_cabinet
+              - light.kitchen_spotlight
+        - service: vacuum.return_to_base
+          target:
+            entity_id: vacuum.first_floor_vacuum
+  mode: single

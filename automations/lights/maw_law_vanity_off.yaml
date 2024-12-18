@@ -1,0 +1,23 @@
+- id: '1696023699743'
+  alias: Lights - Madelyn & Laurel Vanity Off
+  description: Off after 15 minutes of being on
+  trigger:
+    - platform: state
+      entity_id:
+        - switch.madelynvanitylight
+        - switch.laurel_vanity
+      to: 'on'
+      for:
+        hours: 0
+        minutes: 15
+        seconds: 0
+  condition: []
+  action:
+    - service: homeassistant.turn_off
+      data: {}
+      target:
+        entity_id:
+          - switch.laurel_vanity
+          - switch.madelynvanitylight
+          - switch.madelynvanitydesk
+  mode: single

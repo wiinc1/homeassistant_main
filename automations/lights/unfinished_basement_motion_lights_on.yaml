@@ -1,0 +1,38 @@
+- id: '1695861833625'
+  alias: 'Light - Basement Motion Activated'
+  description: 'Turns on basement lights when motion is detected after sunset'
+  trigger:
+    - platform: state
+      entity_id: switch.unfinished_basement_motion_detection
+      to: 'on'
+      from:
+        - 'off'
+        - 'unavailable'
+        - 'unknown'
+  condition:
+    - condition: sun
+      after: sunset
+    - condition: time
+      after: '06:00:00' 
+      before: '23:00:00'
+  action:
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.basement_familyroom_light
+          - light.basementhallwaylight
+          - light.stormshelter
+      data:
+        brightness_pct: 100
+        transition: 1
+    - delay:
+        minutes: 10
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.basement_familyroom_light
+          - light.basementhallwaylight
+          - light.stormshelter
+      data:
+        transition: 2
+  mode: single

@@ -1,0 +1,19 @@
+# Security-related automations
+- id: '1695857031040'
+  alias: security_motion_sprinkler_fire_pit
+  description: "Activates sprinklers on motion detection"
+  trigger:
+  - platform: state
+    entity_id: switch.backyard_west_detections_motion
+  condition:
+  - condition: time
+    after: '23:00:00'
+    before: 05:00:00
+
+- id: '1695940941865'
+  alias: security_motion_sprinkler_east
+  description: "Activates east sprinklers on motion"
+  trigger:
+  - platform: state
+    entity_id: switch.backyard_east_detections_motion
+    to: 'on'
