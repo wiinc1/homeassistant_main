@@ -1,0 +1,33 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+influxdb:
+  api_version: 2
+  ssl: false
+  host: 192.168.1.188
+  port: 8086
+  token: nKohr7wg_FXMTlYh7PU8TLFqQNomTdB0pRWXPG88pqdlDqrCrPn9LpwGK5e5TNjDAGyeVp59VS0DK82ud2-Ahg==
+  organization: cec138a2074a903d
+  bucket: home_assistant 
+  default_measurement: units
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+prometheus:
+device_tracker:
+  - platform: iphonedetect
+    consider_home: 60
+    scan_interval: 12
+    new_device_defaults:
+      track_new_devices: true
+    hosts:
+      graham_iphone: 192.168.1.225  # gaw
+      brian_iphone: 192.168.1.240  # baw
+      madelyn_iphone: 192.168.1.139  # maw
+      kathryn_iphone: 192.168.1.XXX  # kaw

@@ -1,0 +1,10 @@
+*.db
+*.db-shm
+*.db-wal
+*.log
+.storage
+.cloud
+.google.token
+secrets.yaml
+known_devices.yaml
+.uuid

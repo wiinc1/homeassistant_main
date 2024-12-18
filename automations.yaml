@@ -1,0 +1,1182 @@
+- id: '1695769395207'
+  alias: Stairway Light Off At Sunrise
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: 0
+  condition: []
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      device_id: 0756f6be0b3c6aa8481d56e0586c5f7e
+  - service: light.turn_on
+    data:
+      transition: 202
+      brightness_pct: 100
+      brightness_step_pct: 25
+    target:
+      entity_id: light.upstairslights
+  - delay:
+      hours: 4
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.upstairslights
+  mode: single
+- id: '1695769495712'
+  alias: Light - Light Level below 10 or Sunset
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.lumi_lumi_sensor_motion_aq2_illuminance_3
+    below: 15
+  - platform: sun
+    event: sunset
+    offset: 0
+  condition: []
+  action:
+  - data:
+      brightness_pct: 100
+    target:
+      device_id: 0756f6be0b3c6aa8481d56e0586c5f7e
+    action: light.turn_on
+  - data:
+      brightness_pct: 100
+    target:
+      entity_id:
+      - light.kitchen_spotlight
+      - light.lights_china_cabinet
+      - light.lights_familyroom_mantle
+    action: light.turn_on
+  - data: {}
+    target:
+      entity_id:
+      - switch.christmas_tree_lights
+      - light.masterlampbrian
+      - light.masterlampkathryn
+    action: homeassistant.turn_on
+  - data: {}
+    target:
+      entity_id: light.familyroomlamp
+    action: light.turn_on
+  mode: single
+- id: '1695855658006'
+  alias: Vacuum - Saturday
+  description: ''
+  trigger: []
+  condition:
+  - condition: and
+    conditions:
+    - condition: time
+      weekday:
+      - sat
+    - condition: time
+      after: '14:00:00'
+    - condition: time
+      after: '23:00:00'
+  - condition: time
+    after: 06:00:00
+  action:
+  - service: simple_wyze_vac.sweep_rooms
+    data:
+      entity_id: vacuum.first_floor_vacuum
+      rooms:
+      - switch.swv_masterbathroom
+      - switch.swv_masterbedroom
+      - switch.swv_familyroom_2
+      - switch.swv_entryway
+  mode: single
+- id: '1695856290902'
+  alias: Vaccum - Sunday
+  description: ''
+  trigger: []
+  condition:
+  - condition: time
+    weekday:
+    - sun
+  - condition: and
+    conditions:
+    - condition: time
+      after: 08:00:00
+    - condition: time
+      after: '18:00:00'
+  action:
+  - service: simple_wyze_vac.sweep_rooms
+    data:
+      entity_id: vacuum.first_floor_vacuum
+      rooms:
+      - switch.swv_entryway
+      - switch.swv_office
+      - switch.swv_laundry
+      - switch.swv_kitchen
+      - switch.swv_kitchentable
+  mode: single
+- id: '1695857031040'
+  alias: Security - Motion / Sprinkler Fire Pit
+  description: Sprinkler goes on on backyard outside perimeter
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.backyard_west_detections_motion
+  condition:
+  - condition: time
+    after: '23:00:00'
+    before: 05:00:00
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+  action:
+  - service: rachio.start_multiple_zone_schedule
+    data:
+      duration: 3
+    target:
+      entity_id: switch.backyard_outside_perimeter_fire_pit
+  mode: single
+- id: '1695860913280'
+  alias: Light - Garage Hallway Motion Turns Light On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_sensor_motion_aq2_motion
+    - binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
+    - binary_sensor.lumi_lumi_motion_ac02_motion_2
+    to: 'on'
+    from: 'off'
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_sensor_motion_aq2_motion
+    - binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
+    from:
+    to: 'on'
+  condition: []
+  action:
+  - data: {}
+    target:
+      entity_id:
+      - light.garage_hallway_2
+      - switch.laundryroom
+    action: homeassistant.turn_on
+  mode: single
+- id: '1695861833625'
+  alias: 'Motion in Unfinished Basement '
+  description: Basement Family Room & Hallway Light Turns On
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.unfinished_basement_motion_detection
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id:
+    - switch.unfinished_basement_motion_detection
+    from: unavailable
+    to: 'on'
+  - platform: state
+    entity_id:
+    - switch.unfinished_basement_motion_detection
+    from: unknown
+    to: 'on'
+  condition:
+  - condition: time
+    after: sensor.sun_next_setting
+  action:
+  - data:
+      brightness_pct: 100
+    target:
+      entity_id:
+      - light.basement_familyroom_light
+      - light.basementhallwaylight
+      - light.stormshelter
+    action: light.turn_on
+  mode: single
+- id: '1695908406404'
+  alias: Light - Upstairs Lights on at Sunrise
+  description: ''
+  trigger:
+  - platform: time
+    at: 07:00:00
+  condition: []
+  action:
+  - data:
+      brightness_pct: 50
+    target:
+      entity_id:
+      - light.lights_china_cabinet
+      - light.kitchen_spotlight
+      - light.lights_familyroom_mantle
+    action: light.turn_on
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.familyroomlampplug
+  - delay:
+      hours: 4
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.upstairslights
+  mode: single
+- id: '1695921651799'
+  alias: Light - Garage Hallway & Laundry Light Off
+  description: If there is no motion in 10 minutes, turn off both lights.
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_sensor_motion_aq2_occupancy
+    - binary_sensor.lumi_lumi_motion_ac02_occupancy_2
+    - binary_sensor.lumi_lumi_sensor_motion_aq2_occupancy_2
+    to: 'off'
+    from:
+  condition: []
+  action:
+  - data: {}
+    target:
+      entity_id:
+      - light.garage_hallway_2
+    action: homeassistant.turn_off
+  - action: homeassistant.turn_off
+    target:
+      entity_id:
+      - switch.laundryroom
+    data: {}
+  mode: single
+- id: '1695923346147'
+  alias: ZigBee Battery Level
+  description: Level at 40 then notify my iPhone.
+  trigger: []
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.zigbee_battery
+    below: 40
+  action:
+  - service: notify.mobile_app_brians_iphone
+    data:
+      message: ZigBee device is lower than 40%
+  mode: single
+- id: '1695938824208'
+  alias: Water Leak - Graham's Bathroom
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture
+    from:
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.mobile_app_brians_iphone
+    data:
+      message: WATER LEAKING IN GRAHAM's BATHROOM
+  mode: single
+- id: '1695938898184'
+  alias: Water Leak - Kitchen Dishwasher
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_2
+    from:
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.mobile_app_brians_iphone
+    data:
+      message: WATER LEAKING IN KITCHEN DISHWASHER
+  mode: single
+- id: '1695940058781'
+  alias: Notification - Printer Levels
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.printer_levels
+    below: 40
+  condition: []
+  action:
+  - service: notify.mobile_app_brians_iphone
+    data:
+      message: PRINTER LEVEL LOW
+  mode: single
+- id: '1695940941865'
+  alias: Security - Motion / Sprinkler East
+  description: Sprinkler goes on with motion on east.
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.backyard_east_detections_motion
+    to: 'on'
+  condition:
+  - condition: time
+    after: '23:00:00'
+    before: 05:00:00
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+  action:
+  - service: rachio.start_multiple_zone_schedule
+    data:
+      duration: 3
+    target:
+      entity_id: switch.double_door_inside_perimeter
+  mode: single
+- id: '1695941065877'
+  alias: Security - Motion / Sprinkler West Side High
+  description: Sprinkler goes on with motion on west .
+  trigger:
+  - platform: state
+    entity_id:
+    - camera.west_side_high
+    to: 'on'
+  condition:
+  - condition: time
+    after: '23:00:00'
+    before: 05:00:00
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+  action:
+  - service: rachio.start_multiple_zone_schedule
+    data:
+      duration: 3
+    target:
+      entity_id: switch.single_door_inside_perimeter
+  mode: single
+- id: '1695994972564'
+  alias: Presence Detection - Kathryn Arrives Home
+  description: Vacuum Off, Lights On, Garage Door Up
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.kathryn_wuollet
+    zone: zone.home
+    event: enter
+  - platform: zone
+    entity_id: device_tracker.madelyn_w
+    zone: zone.home
+    event: enter
+  - platform: zone
+    entity_id: device_tracker.graham_w
+    zone: zone.home
+    event: enter
+  condition: []
+  action:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.double
+  - service: vacuum.return_to_base
+    data: {}
+    target:
+      entity_id: vacuum.vacuum
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.laundry_light
+      - light.garage_hallway_2
+      - light.lights_familyroom_mantle
+      - light.lights_china_cabinet
+      - switch.christmas_tree_lights
+  mode: single
+- id: '1696023699743'
+  alias: Lights - Madelyn & Laurel Vanity Off
+  description: Off after 15 minutes of being on
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.madelynvanitylight
+    - switch.laurel_vanity
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  condition: []
+  action:
+  - service: homeassistant.turn_off
+    data: {}
+    target:
+      entity_id:
+      - switch.laurel_vanity
+      - switch.madelynvanitylight
+      - switch.madelynvanitydesk
+  mode: single
+- id: '1696381624866'
+  alias: Lights - Basement Motion
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_motion_ac02_motion
+    to: 'on'
+    from:
+  condition:
+  - condition: not
+    conditions:
+    - condition: device
+      device_id: 107cf956dc248c791c8282952a1ef49b
+      domain: media_player
+      entity_id: 66ccbb628ab2804eea6bd8c54e7449f5
+      type: is_playing
+  action:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.basement_familyroom_light
+      - light.basementhallwaylight
+  - if:
+    - condition: state
+      entity_id: binary_sensor.lumi_lumi_motion_ac02_occupancy
+      state: 'off'
+    then:
+    - service: homeassistant.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.basement_familyroom_light
+        - light.basementhallwaylight
+  mode: single
+- id: '1696433765543'
+  alias: Lights - Occupancy Clear in Basement Turn Off Lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_motion_ac02_occupancy
+    from:
+    to: 'off'
+  condition: []
+  action:
+  - service: homeassistant.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.basementhallwaylight
+      - light.basement_familyroom_light
+  mode: single
+- id: '1697150519021'
+  alias: 'Presence Detection - Brian Entering House Zone without Kathryn '
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.brians_iphone
+    zone: zone.home
+    event: enter
+  condition: []
+  action:
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id: cover.single
+  - if:
+    - condition: not
+      conditions:
+      - condition: zone
+        entity_id: device_tracker.kathryn_wuollet
+        zone: zone.home
+    then:
+    - service: homeassistant.turn_on
+      data: {}
+      target:
+        entity_id:
+        - light.garage_hallway_2
+        - light.lights_china_cabinet
+        - light.lights_familyroom_mantle
+        - switch.christmas_tree_lights
+  mode: single
+- id: '1697254652589'
+  alias: Security - Deck Lights On For Motion
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.southeast_corner_motion
+    - binary_sensor.backyard_east_motion
+    - binary_sensor.backyard_west_motion
+    from:
+    to: 'on'
+  condition:
+  - condition: time
+    after: '23:00:00'
+    before: 06:00:00
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  action:
+  - repeat:
+      sequence:
+      - service: switch.toggle
+        data: {}
+        target:
+          entity_id: switch.deck_lights
+      until:
+      - condition: state
+        entity_id: binary_sensor.southeast_corner_motion
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.backyard_east_motion
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.west_side_motion
+        state: 'off'
+  - service: notify.mobile_app_brians_iphone
+    data:
+      message: DECK MOTION DETECTED
+  - repeat:
+      sequence:
+      - service: light.turn_on
+        data: {}
+        target:
+          entity_id:
+          - light.lights_china_cabinet
+          - light.kitchen_spotlight
+      - service: vacuum.return_to_base
+        target:
+          entity_id:
+          - vacuum.first_floor_vacuum
+        data: {}
+      while:
+      - condition: state
+        entity_id: binary_sensor.southeast_corner_motion
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.backyard_east_motion
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.west_side_motion
+        state: 'off'
+  mode: single
+- id: '1697256068504'
+  alias: Security - Outdoor cam Motion
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.backyard_east_detections_motion
+    to: 'on'
+    from:
+  condition: []
+  action:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id: light.upstairslights
+  - service: simple_wyze_vac.sweep_rooms
+    data:
+      entity_id: vacuum.first_floor_vacuum
+      rooms:
+      - switch.swv_kitchentable
+      - switch.swv_kitchen
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.laundry_light
+      - light.upstairspowderbathfan
+  mode: single
+- id: '1698545646536'
+  alias: Light Level - Stairway Light Turns On When Light Level is Low
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.lumi_lumi_sensor_motion_aq2_illuminance_3
+    below: 10
+  condition:
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: light.lightstairway
+      state: 'off'
+    - condition: time
+      after: 08:00:00
+      before: '20:00:00'
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 100
+    target:
+      entity_id: light.lightstairway
+  mode: single
+- id: '1700190235297'
+  alias: Lights & TV - Turn off at 11PM When TV Isn't Playing
+  description: ''
+  trigger:
+  - platform: time
+    at: '23:00:00'
+  condition:
+  - condition: state
+    entity_id: media_player.lg_webos_tv_un7300aud
+    state: idle
+  - condition: state
+    entity_id: media_player.lg_webos_tv_un7300aud
+    state: paused
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  action:
+  - data: {}
+    target:
+      entity_id:
+      - light.familyroomlamp
+      - light.upstairslights
+      - light.basementlights
+      - switch.christmastreelights
+      - media_player.tvgroup
+      - switch.madelynroomswitch
+      - switch.laurelroomswitch
+    action: homeassistant.turn_off
+  - repeat:
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - light.lights_familyroom_mantle
+          - media_player.lg_webos_tv_un7300aud
+          - light.lights_china_cabinet
+          - light.kitchen_spotlight
+          - light.garage_hallway_2
+          - light.laundry_light
+          - switch.christmas_tree_lights
+        action: homeassistant.turn_off
+      until:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.lg_webos_tv_un7300aud
+          state: playing
+          for:
+            hours: 0
+            minutes: 2
+            seconds: 0
+  mode: single
+- id: '1701639971711'
+  alias: 'Lights - Christmas: Outside Decorations On'
+  description: Sunset turn on lights
+  triggers:
+  - event: sunset
+    trigger: sun
+  conditions: []
+  actions:
+  - data: {}
+    action: homeassistant.turn_on
+    target:
+      entity_id:
+      - switch.christmasoutdoorplug
+      - switch.christmasoutdoorplug2
+      - switch.christmasoutdoorplug3
+      - switch.christmasoutdoorplug4
+  mode: single
+- id: '1701640073494'
+  alias: 'Lights - Christmas: Outside Decorations Off'
+  description: Sunset turn off lights
+  triggers:
+  - at: '23:00:00'
+    trigger: time
+  conditions: []
+  actions:
+  - data: {}
+    action: homeassistant.turn_off
+    target:
+      entity_id:
+      - switch.christmasoutdoorplug
+      - switch.christmasoutdoorplug2
+      - switch.christmasoutdoorplug3
+      - switch.christmasoutdoorplug4
+  mode: single
+- id: '1701640302278'
+  alias: 'Lights - Christmas: Inside Decorations On'
+  description: Turn on at 6:15AM
+  triggers:
+  - at: 07:00:00
+    trigger: time
+  conditions: []
+  actions:
+  - data: {}
+    action: homeassistant.turn_on
+    target:
+      entity_id:
+      - switch.upstairsfamilyroomchristmastree
+      - switch.basementchristmastree
+      - switch.christmastreelaurel
+  - delay:
+      hours: 4
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+  - data: {}
+    action: homeassistant.turn_off
+    target:
+      entity_id:
+      - switch.upstairsfamilyroomchristmastree
+      - switch.basementchristmastree
+      - switch.christmastreelaurel
+  - delay:
+      hours: 5
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - data: {}
+    action: homeassistant.turn_on
+    target:
+      entity_id:
+      - switch.upstairsfamilyroomchristmastree
+      - switch.basementchristmastree
+      - switch.christmastreelaurel
+  - delay:
+      hours: 5
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+  - data: {}
+    action: homeassistant.turn_off
+    target:
+      entity_id:
+      - switch.upstairsfamilyroomchristmastree
+      - switch.basementchristmastree
+      - switch.christmastreelaurel
+  mode: single
+- id: '1701645888617'
+  alias: Notification - Office Window Opened
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.doorwindowsensor1_opening
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.doorwindowsensor1_opening
+    to: unavailable
+  - platform: state
+    entity_id:
+    - binary_sensor.doorwindowsensor1_opening
+    to: unknown
+  condition: []
+  action:
+  - service: notify.mobile_app_brians_iphone
+    data:
+      message: Office Window Opened
+  mode: single
+- id: '1701715215674'
+  alias: Notification - Graham's Window Open
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.grahamsroomwindow_opening
+    to: 'on'
+  condition: []
+  action:
+  - target:
+      entity_id: sensor.aeotecsiren_alarm
+    action: siren.turn_on
+    data: {}
+- id: '1701715280835'
+  alias: Notification - Guest Bedroom Window Open
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.doorwindowsensor1_opening
+    - binary_sensor.guestbedroomwindow_opening
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.doorwindowsensor1_opening
+    - binary_sensor.guestbedroomwindow_opening
+    to: unavailable
+  - platform: state
+    entity_id:
+    - binary_sensor.doorwindowsensor1_opening
+    - binary_sensor.guestbedroomwindow_opening
+    to: unknown
+  condition: []
+  action:
+  - service: notify.mobile_app_brians_iphone
+    data:
+      message: Guest Bedroom Window Opened
+  mode: single
+- id: '1701726847229'
+  alias: 'Lights - Christmas: Inside Lights Off'
+  description: ''
+  triggers:
+  - at: '22:00:00'
+    trigger: time
+  conditions: []
+  actions:
+  - data: {}
+    target:
+      entity_id:
+      - switch.upstairsfamilyroomchristmastree
+      - switch.basementchristmastree
+      - switch.christmastreelaurel
+    action: homeassistant.turn_off
+  mode: single
+- id: '1703090073999'
+  alias: Notification - Laurel Window Open
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.laurelroomwindow_opening
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.laurelroomwindow_opening
+    to: unavailable
+  - platform: state
+    entity_id:
+    - binary_sensor.laurelroomwindow_opening
+    to: unknown
+  condition: []
+  action:
+  - service: notify.mobile_app_brians_iphone
+    data:
+      message: Office Window Opened
+  mode: single
+- id: '1703090140837'
+  alias: Notification - Madelyn's Window Open
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.madelynroomwindow_opening
+    to: 'on'
+  - platform: state
+    entity_id:
+    - binary_sensor.madelynroomwindow_opening
+    to: unavailable
+  - platform: state
+    entity_id:
+    - binary_sensor.madelynroomwindow_opening
+    to: unknown
+  condition: []
+  action:
+  - service: notify.mobile_app_brians_iphone
+    data:
+      message: Office Window Opened
+  mode: single
+- id: '1710290392028'
+  alias: Security - Front Porch Motion
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.doorbell_detections_person
+    - switch.front_porch_detections_motion
+    to: 'on'
+    from:
+  condition: []
+  action:
+  - service: simple_wyze_vac.sweep_rooms
+    data:
+      entity_id: vacuum.first_floor_vacuum
+      rooms:
+      - switch.swv_entryway
+      - switch.swv_office
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.upstairslights
+      - light.upstairspowderbathfan
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.laundry_light
+      - switch.laundry_light
+  mode: single
+- id: '1710295366132'
+  alias: TV - Turn ON
+  description: ''
+  trigger:
+  - platform: time
+    at: '21:24:00'
+  condition: []
+  action:
+  - service: media_player.turn_on
+    data: {}
+    target:
+      entity_id: media_player.tvgroup
+  - service: media_player.media_play_pause
+    target:
+      entity_id: media_player.lg_webos_tv_un7300aud
+    data: {}
+  mode: single
+- id: '1727466541544'
+  alias: Announce Graham's Room Window Open
+  description: Announce when Graham's room window is opened
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.grahamsroomwindow_opening
+    to: 'on'
+  action:
+  - repeat:
+      count: 4
+      sequence:
+      - data:
+          target:
+          - media_player.graham_echo
+          - media_player.kitchen_echo_dot
+          - media_player.laurel_echo
+          - media_player.madelyn_echo
+          message: 'Attention: The window in Graham''s room is open. Please check
+            and close it if necessary.'
+        action: notify.alexa_media
+      - delay:
+          seconds: 25
+  - target:
+      entity_id: input_select.open_windows
+    data:
+      option: Graham's Room
+    action: input_select.select_option
+- id: '1727496288257'
+  alias: Announce when Madelyn’s room window is opened
+  description: Announce when Madelyn's room window is opened
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.madelynroomwindow_opening
+    to: 'on'
+  condition: []
+  action:
+  - repeat:
+      count: 4
+      sequence:
+      - data:
+          target:
+          - media_player.graham_echo
+          - media_player.kitchen_echo_dot
+          - media_player.laurel_echo
+          - media_player.madelyn_echo
+          message: 'Attention: The window in Madelyn''s room is open. Please check
+            and close it if necessary.'
+        action: notify.alexa_media
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 20
+          milliseconds: 0
+  - target:
+      entity_id: input_select.open_windows
+    data:
+      option: Madelyn’s Room
+    action: input_select.select_option
+  mode: single
+- id: '1727496479765'
+  alias: Announce when Basement family room window is opened
+  description: Announce when Basement family room window is opened
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.basementfamilyroomwindow_opening
+    to: 'on'
+  condition: []
+  action:
+  - repeat:
+      count: 4
+      sequence:
+      - data:
+          target:
+          - media_player.graham_echo
+          - media_player.kitchen_echo_dot
+          - media_player.laurel_echo
+          - media_player.madelyn_echo
+          message: 'Attention: The window in the basement family room is open. Please
+            check and close it if necessary.'
+        action: notify.alexa_media
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 20
+          milliseconds: 0
+  - target:
+      entity_id: input_select.open_windows
+    data:
+      option: Basement family Room
+    action: input_select.select_option
+  mode: single
+- id: '1727496623044'
+  alias: Announce when basement kitchen room window is opened
+  description: Announce when basement kitchen room window is opened
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.basementkitchenwindow_opening
+    to: 'on'
+  condition: []
+  action:
+  - repeat:
+      count: 4
+      sequence:
+      - data:
+          target:
+          - media_player.graham_echo
+          - media_player.kitchen_echo_dot
+          - media_player.laurel_echo
+          - media_player.madelyn_echo
+          message: 'Attention: The window in the basement kitchen is open. Please
+            check and close it if necessary.'
+        action: notify.alexa_media
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 20
+          milliseconds: 0
+  - target:
+      entity_id: input_select.open_windows
+    data:
+      option: Basement kitchen
+    action: input_select.select_option
+  mode: single
+- id: '1727496837391'
+  alias: Announce when guest bedroom window is open
+  description: Announce when guest bedroom window is open
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.guestbedroomwindow_opening
+    to: 'on'
+  condition: []
+  action:
+  - repeat:
+      count: 4
+      sequence:
+      - data:
+          target:
+          - media_player.graham_echo
+          - media_player.kitchen_echo_dot
+          - media_player.laurel_echo
+          - media_player.madelyn_echo
+          message: 'Attention: The window in the guest bedroom is open. Please check
+            and close it if necessary.'
+        action: notify.alexa_media
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 20
+          milliseconds: 0
+  - target:
+      entity_id: input_select.open_windows
+    data:
+      option: Guest bedroom
+    action: input_select.select_option
+  mode: single
+- id: '1727496937201'
+  alias: Announce when office window is opened
+  description: Announce when office window is opened
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.officewindow_opening
+    to: 'on'
+  condition: []
+  action:
+  - repeat:
+      count: 4
+      sequence:
+      - data:
+          target:
+          - media_player.graham_echo
+          - media_player.kitchen_echo_dot
+          - media_player.laurel_echo
+          - media_player.madelyn_echo
+          message: 'Attention: The window in the office is open. Please check and
+            close it if necessary.'
+        action: notify.alexa_media
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 20
+          milliseconds: 0
+  - target:
+      entity_id: input_select.open_windows
+    data:
+      option: Office
+    action: input_select.select_option
+  mode: single
+- alias: Start Vacuum When Everyone is Away
+  description: Start vacuum when Madelyn, Kathryn, and Graham are not home
+  trigger:
+  - platform: state
+    entity_id:
+    - device_tracker.madelyn_iphone
+    - device_tracker.kathryn_iphone
+    - device_tracker.graham_iphone
+    to: not_home
+  condition:
+  - condition: state
+    entity_id: device_tracker.madelyn_iphone
+    state: not_home
+  - condition: state
+    entity_id: device_tracker.kathryn_iphone
+    state: not_home
+  - condition: state
+    entity_id: device_tracker.graham_iphone
+    state: not_home
+  action: simple_wyze_.vac.sweep_rooms
+  data:
+    entity_id: vacuum.first_floor_vacuum
+    rooms:
+    - switch.swv_office
+    - switch.swv_kitchen
+    - switch.swv_kitchentable
+  id: 4e0405e9cdff4690a54630034100e93e
+- id: '1733889094747'
+  alias: Laurel Vanity Off at Night
+  description: ''
+  triggers:
+  - trigger: time
+    at: '21:30:00'
+  conditions: []
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.laurel_vanity
+  - delay:
+      hours: 0
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.laurel_vanity
+  mode: single
