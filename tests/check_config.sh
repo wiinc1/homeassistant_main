@@ -1,2 +1,2 @@
 #!/bin/bash
-ha core check-config
+docker exec homeassistant python -m homeassistant --config /config --script check_config
