@@ -8,12 +8,14 @@
         - binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
         - binary_sensor.lumi_lumi_motion_ac02_motion_2
       to: 'off'
-      for: '00:10:00'  # 10 minutes
+      for: '00:05:00'  # 10 minutes
   condition: []
   action:
     - service: light.turn_off
       target:
-        entity_id: light.garage_hallway_2
+        entity_id:
+          - light.garage_hallway_2  
+          - light.garage_hallway    # This light was missing from the turn_off action
       data:
         transition: 1
     - service: switch.turn_off
