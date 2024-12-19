@@ -55,7 +55,7 @@ action:
                       {% else %}
                         Weather Alert for {{ alert.area }}. {{ alert.description }}
                       {% endif %}
-                - delay: '00:02:00'  # Wait 2 minutes between announcements
+                - delay: '00:01:00'  # Wait 2 minutes between announcements
     # If triggered by stop command
     default:
       - service: input_boolean.turn_off
