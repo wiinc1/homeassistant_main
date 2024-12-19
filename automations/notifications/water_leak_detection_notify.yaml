@@ -1,0 +1,59 @@
+- id: 'water_leak_detection'
+  alias: Water Leak Detection
+  description: 'Notify when water leak is detected'
+  trigger:
+    # Initial trigger for leak detection
+    - platform: state
+      entity_id: group.water_leak_sensors
+      to: 'on'
+    # Trigger every minute for repeat announcements
+    - platform: time_pattern
+      minutes: /1
+  condition:
+    # Only run if leak is detected
+    - condition: state
+      entity_id: group.water_leak_sensors
+      state: 'on'
+  action:
+    # Mobile push notification
+    - service: notify.mobile_app_your_phone_name
+      data:
+        title: "⚠️ WATER LEAK ALERT! ⚠️"
+        message: >
+          Alert! Alert! Alert! Water leaking in 
+          {% if is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture', 'on') %}
+            Graham's Bathroom
+          {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_2', 'on') %}
+            Kitchen Dishwasher
+          {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_3', 'on') %}
+            Kitchen Sink
+          {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_4', 'on') %}
+            Laundry Room
+          {% endif %}!
+        data:
+          priority: high
+          channel: alarm
+
+    # Initial double Alexa announcement
+    - repeat:
+        count: 2
+        sequence:
+          - service: notify.alexa_media
+            data:
+              target: group.alexa_devices
+              message: >
+                Alert! Alert! Alert! Water leaking in 
+                {% if is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture', 'on') %}
+                  Graham's Bathroom
+                {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_2', 'on') %}
+                  Kitchen Dishwasher
+                {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_3', 'on') %}
+                  Kitchen Sink
+                {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_4', 'on') %}
+                  Laundry Room
+                {% endif %}!
+              data:
+                type: announce
+                method: all
+          - delay: '00:00:03'  # 3 second delay between initial announcements
+  mode: restart

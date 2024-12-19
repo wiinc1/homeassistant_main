@@ -9,3 +9,11 @@ alexa_devices:
     - media_player.graham_s_room
     - media_player.graham_echo
     - media_player.basement_tv_2
+
+water_leak_sensors:
+  name: Water Leak Sensors
+  entities:
+    - binary_sensor.lumi_sensor_wleak_aq1_moisture
+    - binary_sensor.lumi_sensor_wleak_aq1_moisture_2
+    - binary_sensor.lumi_sensor_wleak_aq1_moisture_3
+    - binary_sensor.lumi_sensor_wleak_aq1_moisture_4
