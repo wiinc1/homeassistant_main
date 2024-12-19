@@ -13,7 +13,7 @@
         entity_id: switch.laurel_vanity
     - delay:
         hours: 0
-        minutes: 30
+        minutes: 50
         seconds: 0
         milliseconds: 0
     - action: switch.turn_off
