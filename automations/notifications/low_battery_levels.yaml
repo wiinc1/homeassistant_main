@@ -35,24 +35,23 @@
       to: 'on'
   action:
     - variables:
-        notification_data: >
+        notification_data: >-
           {% set messages = {
-            # Battery notifications
             'sensor.zigbee_battery': {
               'title': 'Low Battery Alert',
               'message': 'ZigBee device battery is below 40%'
             },
             'sensor.grahamsroomwindow_battery': {
               'title': 'Low Battery Alert',
-              'message': 'Graham\'s room window sensor battery is below 40%'
+              'message': "Graham's room window sensor battery is below 40%"
             },
             'sensor.laurelroomwindow_battery': {
               'title': 'Low Battery Alert',
-              'message': 'Laurel\'s room window sensor battery is below 40%'
+              'message': "Laurel's room window sensor battery is below 40%"
             },
             'sensor.madelynroomwindow_battery': {
               'title': 'Low Battery Alert',
-              'message': 'Madelyn\'s room window sensor battery is below 40%'
+              'message': "Madelyn's room window sensor battery is below 40%"
             },
             'sensor.basementfamilyroomwindow_battery': {
               'title': 'Low Battery Alert',
@@ -88,20 +87,19 @@
             },
             'sensor.lumi_lumi_sensor_wleak_aq1_battery': {
               'title': 'Low Battery Alert',
-              'message': 'Water leak sensor (Graham\'s bathroom) battery is below 40%'
+              'message': "Water leak sensor (Graham's bathroom) battery is below 40%"
             },
             'sensor.lumi_lumi_sensor_wleak_aq1_battery_2': {
               'title': 'Low Battery Alert',
               'message': 'Water leak sensor (Kitchen) battery is below 40%'
             },
-            # Other level notifications
             'sensor.printer_levels': {
               'title': 'Low Printer Level',
               'message': 'Printer level is below 40%'
             },
             'binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture': {
               'title': 'Water Leak Detected!',
-              'message': 'WATER LEAKING IN GRAHAM\'S BATHROOM'
+              'message': "WATER LEAKING IN GRAHAM'S BATHROOM"
             },
             'binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_2': {
               'title': 'Water Leak Detected!',

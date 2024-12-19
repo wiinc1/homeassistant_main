@@ -1,19 +1,18 @@
 - id: '1701639971711'
   alias: 'Lights - Christmas: Outside Decorations On'
   description: Sunset turn on lights
-  triggers:
-  - event: sunset
-    trigger: sun
-  conditions: []
-  actions:
-  - data: {}
-    action: homeassistant.turn_on
-    target:
-      entity_id:
-      - switch.christmasoutdoorplug
-      - switch.christmasoutdoorplug2
-      - switch.christmasoutdoorplug3
-      - switch.christmasoutdoorplug4
+  trigger:    # Single 'trigger' instead of 'triggers'
+    - platform: sun
+      event: sunset
+  condition: []   # Changed from 'conditions' to 'condition'
+  action:     # Single 'action' instead of 'actions'
+    - service: homeassistant.turn_on
+      target:
+        entity_id:
+          - switch.christmasoutdoorplug
+          - switch.christmasoutdoorplug2
+          - switch.christmasoutdoorplug3
+          - switch.christmasoutdoorplug4
   mode: single
 
 - id: '1701640073494'

@@ -12,7 +12,9 @@
   action:
     - service: light.turn_on
       target:
-        entity_id: light.garage_hallway_2
+        entity_id:
+          - light.garage_hallway_2
+          - light.garage_hallway
       data:
         brightness_pct: 100
         transition: 1
