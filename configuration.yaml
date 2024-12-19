@@ -51,3 +51,9 @@ recorder:
     domains:
       - automation         # Don't record automation states
       - script            # Don't record script states
+
+# National Weather Service integration to stop alexa from announcing weather alerts
+input_boolean:
+  weather_alert_active:
+    name: Weather Alert Active
+    initial: off
