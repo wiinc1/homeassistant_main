@@ -48,6 +48,7 @@
       - switch.upstairsfamilyroomchristmastree
       - switch.basementchristmastree
       - switch.christmastreelaurel
+      - switch.basementfamilyroomwindowoutlet
   - delay:
       hours: 4
       minutes: 30
@@ -60,6 +61,7 @@
       - switch.upstairsfamilyroomchristmastree
       - switch.basementchristmastree
       - switch.christmastreelaurel
+      - switch.basementfamilyroomwindowoutlet
   - delay:
       hours: 5
       minutes: 0
@@ -72,6 +74,7 @@
       - switch.upstairsfamilyroomchristmastree
       - switch.basementchristmastree
       - switch.christmastreelaurel
+      - switch.basementfamilyroomwindowoutlet
   - delay:
       hours: 5
       minutes: 30
@@ -84,13 +87,14 @@
       - switch.upstairsfamilyroomchristmastree
       - switch.basementchristmastree
       - switch.christmastreelaurel
+      - switch.basementfamilyroomwindowoutlet
   mode: single
 
 - id: '1701726847229'
   alias: 'Lights - Christmas: Inside Lights Off'
   description: ''
   triggers:
-  - at: '22:00:00'
+  - at: '22:30:00'
     trigger: time
   conditions: []
   actions:
@@ -100,5 +104,6 @@
       - switch.upstairsfamilyroomchristmastree
       - switch.basementchristmastree
       - switch.christmastreelaurel
+      - switch.basementfamilyroomwindowoutlet
     action: homeassistant.turn_off
   mode: single
