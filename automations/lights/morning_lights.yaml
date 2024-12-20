@@ -1,31 +1,26 @@
-- id: '1695908406404'
-  alias: Light - Morning Lights Schedule
-  description: 'Turns on main floor lights at sunrise and turns them off 4 hours later'
+- id: 'morning_lights_automation'
+  alias: Light - Morning Kitchen Lights
+  description: 'Turns on kitchen lights at sunrise and turns them off 4 hours later'
   trigger:
     - platform: sun
       event: sunrise
-      offset: '+01:00:00'
+      offset: '+00:00:00'  # You can adjust this offset if needed
   condition:
     - condition: time
-      after: '06:00:00' 
+      after: '06:00:00'
       before: '12:00:00'
-    - condition: state
-      entity_id: input_boolean.vacation_mode
-      state: 'off'
-    - condition: state
-      entity_id: binary_sensor.workday_sensor
-      state: 'on'
   action:
-    - service: scene.turn_on
+    - service: light.turn_on
       target:
-        entity_id: scene.morning_lights
+        entity_id: light.lights_family_kitchen
       data:
+        brightness_pct: 100
         transition: 300
     - delay:
         hours: 4
-    - service: scene.turn_on
+    - service: light.turn_off
       target:
-        entity_id: scene.all_lights_off
+        entity_id: light.lights_family_kitchen
       data:
         transition: 300
   mode: single

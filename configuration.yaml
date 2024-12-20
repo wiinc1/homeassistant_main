@@ -57,3 +57,5 @@ input_boolean:
   weather_alert_active:
     name: Weather Alert Active
     initial: off
+
+input_button: !include input_buttons.yaml

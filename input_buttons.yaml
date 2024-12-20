@@ -1,0 +1,33 @@
+vacuum_closet:
+  name: Clean Closet
+  icon: mdi:door-closed
+vacuum_entryway:
+  name: Clean Entryway
+  icon: mdi:door-entrance
+vacuum_familyroom:
+  name: Clean Family Room
+  icon: mdi:sofa
+vacuum_garageentry:
+  name: Clean Garage Entry
+  icon: mdi:garage
+vacuum_kitchen:
+  name: Clean Kitchen
+  icon: mdi:stove
+vacuum_kitchentable:
+  name: Clean Kitchen Table
+  icon: mdi:table-furniture
+vacuum_laundry:
+  name: Clean Laundry
+  icon: mdi:washing-machine
+vacuum_madelyn:
+  name: Clean Madelyn's Room
+  icon: mdi:bed
+vacuum_masterbathroom:
+  name: Clean Master Bathroom
+  icon: mdi:shower
+vacuum_masterbedroom:
+  name: Clean Master Bedroom
+  icon: mdi:bed-king
+vacuum_office:
+  name: Clean Office
+  icon: mdi:desk
