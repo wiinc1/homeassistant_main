@@ -1,18 +1,192 @@
-2024-12-20 16:56:28.411 WARNING (SyncWorker_0) [homeassistant.util.yaml.loader] YAML file /config/automations/notifications/severe_weather_alert.yaml contains duplicate key "platform". Check lines 8 and 10
-2024-12-20 16:56:28.654 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration presence_simulation which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.656 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration iphonedetect which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.659 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration pirateweather which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.661 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration alexa_media which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.662 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration simple_wyze_vac which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.663 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration hacs which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.667 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration nws_alerts which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.670 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration gasbuddy which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.672 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration reolink_discovery which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.673 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration wyzeapi which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:56:28.674 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration auto_backup which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
-2024-12-20 16:57:05.978 ERROR (MainThread) [homeassistant.components.sensor] Platform smartthings does not generate unique IDs. ID 1a6d0984-19b4-426e-86d8-77906f2fe112.energy already exists - ignoring sensor.outlet_energy_meter
-2024-12-20 16:57:05.978 ERROR (MainThread) [homeassistant.components.sensor] Platform smartthings does not generate unique IDs. ID 1a6d0984-19b4-426e-86d8-77906f2fe112.power already exists - ignoring sensor.outlet_power_meter
-2024-12-20 16:57:06.070 ERROR (MainThread) [homeassistant.components.automation] Automation with alias 'Vacuum Room Selection' failed to setup triggers and has been disabled: Entity input_button.* is neither a valid entity ID nor a valid UUID for dictionary value @ data['entity_id']. Got None
-2024-12-20 16:57:14.135 WARNING (MainThread) [homeassistant.components.homeassistant.triggers.numeric_state] Error initializing 'Low Level Notifications' trigger: In 'numeric_state' condition: unknown entity sensor.southeast_corner_battery
-2024-12-20 16:57:14.135 WARNING (MainThread) [homeassistant.components.homeassistant.triggers.numeric_state] Error initializing 'Low Level Notifications' trigger: In 'numeric_state' condition: unknown entity sensor.backyard_east_battery
-2024-12-20 16:57:14.136 WARNING (MainThread) [homeassistant.components.homeassistant.triggers.numeric_state] Error initializing 'Low Level Notifications' trigger: In 'numeric_state' condition: unknown entity sensor.backyard_west_battery
+2024-12-20 16:59:27.196 WARNING (SyncWorker_0) [homeassistant.util.yaml.loader] YAML file /config/automations/notifications/severe_weather_alert.yaml contains duplicate key "platform". Check lines 8 and 10
+2024-12-20 16:59:27.487 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration presence_simulation which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.490 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration iphonedetect which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.494 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration pirateweather which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.499 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration alexa_media which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.499 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration simple_wyze_vac which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.508 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration hacs which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.509 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration nws_alerts which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.513 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration gasbuddy which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.515 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration reolink_discovery which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.520 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration wyzeapi which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 16:59:27.522 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration auto_backup which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2024-12-20 17:00:04.307 ERROR (MainThread) [homeassistant.components.sensor] Platform smartthings does not generate unique IDs. ID 1a6d0984-19b4-426e-86d8-77906f2fe112.energy already exists - ignoring sensor.outlet_energy_meter
+2024-12-20 17:00:04.317 ERROR (MainThread) [homeassistant.components.sensor] Platform smartthings does not generate unique IDs. ID 1a6d0984-19b4-426e-86d8-77906f2fe112.power already exists - ignoring sensor.outlet_power_meter
+2024-12-20 17:00:10.115 WARNING (MainThread) [homeassistant.components.homeassistant.triggers.numeric_state] Error initializing 'Low Level Notifications' trigger: In 'numeric_state' condition: unknown entity sensor.southeast_corner_battery
+2024-12-20 17:00:10.115 WARNING (MainThread) [homeassistant.components.homeassistant.triggers.numeric_state] Error initializing 'Low Level Notifications' trigger: In 'numeric_state' condition: unknown entity sensor.backyard_east_battery
+2024-12-20 17:00:10.115 WARNING (MainThread) [homeassistant.components.homeassistant.triggers.numeric_state] Error initializing 'Low Level Notifications' trigger: In 'numeric_state' condition: unknown entity sensor.backyard_west_battery
+2024-12-20 18:39:56.555 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_1] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.614 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_20] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.622 CRITICAL (SyncWorker_20) [concurrent.futures] Exception in worker
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 82, in _worker
+    work_item = work_queue.get_nowait()
+_queue.Empty
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+SystemExit
+2024-12-20 18:39:56.661 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_28] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.683 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_17] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.706 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_26] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.730 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_43] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.754 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_6] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.777 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_29] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.803 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_44] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.828 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_2] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.936 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_6] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:57.046 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_29] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:56.941 ERROR (MainThread) [homeassistant] Error doing job: Exception in callback _TrackPointUTCTime(hass=<HomeAssistant STOPPED>, job=<Job track point in utc time 2024-12-21 00:39:56.830935+00:00 HassJobType.Executor <function setup_scanner.<locals>.update_interval at 0x712d43fda340>>, utc_point_in_time=datetime.datetime(2024, 12, 21, 0, 39, 56, 830935, tzinfo=datetime.timezone.utc), expected_fire_timestamp=1734741596.830935, _cancel_callback=<TimerHandle when=90960.05364274979 ...()>)() (None)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/event.py", line 1525, in __call__
+    self.hass.async_run_hass_job(self.job, self.utc_point_in_time)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/core.py", line 952, in async_run_hass_job
+    return self._async_add_hass_job(hassjob, *args, background=background)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/core.py", line 780, in _async_add_hass_job
+    task = self.loop.run_in_executor(None, hassjob.target, *args)
+  File "/usr/local/lib/python3.13/asyncio/base_events.py", line 890, in run_in_executor
+    self._check_default_executor()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/asyncio/base_events.py", line 556, in _check_default_executor
+    raise RuntimeError('Executor shutdown has been called')
+RuntimeError: Executor shutdown has been called
+2024-12-20 18:39:57.143 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_28] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:57.240 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_17] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:57.337 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_44] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:57.434 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_26] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:57.531 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_43] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
+2024-12-20 18:39:57.629 WARNING (Thread-14 (_do_shutdown)) [homeassistant.util.executor] Thread[SyncWorker_2] is still running at shutdown: File "/usr/local/lib/python3.13/threading.py", line 1012, in _bootstrap
+    self._bootstrap_inner()
+  File "/usr/local/lib/python3.13/threading.py", line 1041, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.13/threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89, in _worker
+    work_item = work_queue.get(block=True)
