@@ -1,0 +1,21 @@
+- alias: "Christmas Tree - Turn Off When Away"
+    trigger:
+      - platform: state
+        entity_id: 
+          - device_tracker.kathryn_phone
+          - device_tracker.madelyn_phone
+        to: 'not_home'
+    condition:
+      # Check if the other person is also not home
+      - condition: state
+        entity_id: device_tracker.kathryn_phone
+        state: 'not_home'
+      - condition: state
+        entity_id: device_tracker.madelyn_phone
+        state: 'not_home'
+    action:
+      - service: switch.turn_off
+        target:
+          entity_id: 
+            - switch.upstairsfamilyroomchristmastree
+            - switch.basementchristmastree
