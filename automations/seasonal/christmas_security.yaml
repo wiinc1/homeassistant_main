@@ -1,0 +1,31 @@
+- id: MotionLightsOutside
+  alias: "Turn on outside lights when motion detected (night only)"
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.backyard_west_motion
+        - binary_sensor.front_porch_motion
+        - binary_sensor.backyard_east_motion
+        - binary_sensor.southeast_corner_motion
+      from: "off"
+      to: "on"
+  condition:
+    - condition: time
+      after: "22:00:00"
+      before: "05:00:00"
+  action:
+    - service: switch.turn_on
+      target:
+        entity_id:
+          - switch.christmasoutdoorplug
+          - switch.christmasoutdoorplug2
+          - switch.christmasoutdoorplug3
+          - switch.christmasoutdoorplug4
+    - delay: "00:05:00"
+    - service: switch.turn_off
+      target:
+        entity_id:
+          - switch.christmasoutdoorplug
+          - switch.christmasoutdoorplug2
+          - switch.christmasoutdoorplug3
+          - switch.christmasoutdoorplug4
