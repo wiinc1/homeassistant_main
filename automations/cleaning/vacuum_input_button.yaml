@@ -1,0 +1,22 @@
+- id: 'vacuum_room_selection'
+  alias: "Vacuum Room Selection"
+  trigger:
+    - platform: state
+      entity_id: 
+        - input_button.vacuum_closet
+        - input_button.vacuum_entryway
+        - input_button.vacuum_familyroom
+        - input_button.vacuum_garageentry
+        - input_button.vacuum_kitchen
+        - input_button.vacuum_kitchentable
+        - input_button.vacuum_laundry
+        - input_button.vacuum_madelyn
+        - input_button.vacuum_masterbathroom
+        - input_button.vacuum_masterbedroom
+        - input_button.vacuum_office
+      to: "pressed"
+  action:
+    - service: script.vacuum_room_control
+      data:
+        trigger:
+          entity_id: "{{ trigger.entity_id }}"

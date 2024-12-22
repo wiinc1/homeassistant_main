@@ -1,0 +1,12 @@
+vacuum_room_control:
+  alias: "Vacuum Room Control"
+  sequence:
+    - service: group.turn_on
+      target:
+        entity_id: group.vacuum_rooms
+    - service: switch.turn_off
+      target:
+        entity_id: "{{ 'switch.swv_' ~ trigger.entity_id.split('vacuum_')[1] }}"
+    - service: vacuum.start
+      target:
+        entity_id: vacuum.first_floor_vacuum

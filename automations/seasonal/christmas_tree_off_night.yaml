@@ -1,0 +1,10 @@
+alias: "Christmas Tree - Turn Off at Night"
+trigger:
+  - platform: time
+    at: '22:30:00'
+action:
+  - service: switch.turn_off
+    target:
+      entity_id: 
+        - switch.upstairsfamilyroomchristmastree
+        - switch.basementchristmastree

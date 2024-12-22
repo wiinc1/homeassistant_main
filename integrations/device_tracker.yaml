@@ -2,6 +2,7 @@
   consider_home: 60
   scan_interval: 12
   hosts:
-    brian_phone: 192.168.1.99
+    brian_phone: 192.168.1.34 
     graham_phone: 192.168.1.225
     madelyn_phone: 192.168.1.155
+    kathryn_phone: 192.168.1.23
