@@ -13,10 +13,10 @@ alexa_devices:
 water_leak_sensors:
   name: Water Leak Sensors
   entities:
-    - binary_sensor.lumi_sensor_wleak_aq1_moisture
-    - binary_sensor.lumi_sensor_wleak_aq1_moisture_2
-    - binary_sensor.lumi_sensor_wleak_aq1_moisture_3
-    - binary_sensor.lumi_sensor_wleak_aq1_moisture_4
+    - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_3  # Kitchen Sink
+    - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_4  # Laundry Room
+    - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture    # Graham's Bathroom
+    - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_2  # Kitchen Dishwasher
 
 lights_family_kitchen:
   name: Family Kitchen Lights
@@ -41,10 +41,10 @@ lights.upstairs:
 all_devices:
   name: All Devices
   entities:
-    - brian_phone
-    - kathryn_phone
-    - graham_phone
-    - madelyn_phone
+    - device_tracker.brian_phone  # Fixed invalid entity ID
+    - device_tracker.kathryn_phone
+    - device_tracker.graham_phone
+    - device_tracker.madelyn_phone
 
 vacuum_rooms:
   name: Vacuum Rooms
