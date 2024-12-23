@@ -7,7 +7,7 @@
     - platform: numeric_state
       entity_id:
         - sensor.lumi_lumi_sensor_motion_aq2_illuminance_3
-      below: 10
+      below: 20 
     - platform: state
       entity_id: weather.home
       to: 'cloudy'

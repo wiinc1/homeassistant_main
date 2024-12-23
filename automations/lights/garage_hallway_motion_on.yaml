@@ -10,15 +10,40 @@
       to: 'on'
   condition: []
   action:
-    - service: light.turn_on
-      target:
-        entity_id:
-          - light.garage_hallway_2
-          - light.garage_hallway
-      data:
-        brightness_pct: 100
-        transition: 1
-    - service: switch.turn_on
-      target:
-        entity_id: switch.laundryroom
+    - choose:
+        # Night time behavior (11 PM to sunrise)
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: time
+                  after: '23:00:00'
+                - condition: sun
+                  before: sunrise
+            - condition: sun
+              before: sunrise
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.garage_hallway_2
+                  - light.garage_hallway
+              data:
+                brightness_pct: 100
+                transition: 20
+            - service: switch.turn_on
+              target:
+                entity_id: switch.laundryroom
+        # Default daytime behavior
+        - conditions: []
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.garage_hallway_2
+                  - light.garage_hallway
+              data:
+                brightness_pct: 100
+            - service: switch.turn_on
+              target:
+                entity_id: switch.laundryroom
   mode: single

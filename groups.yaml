@@ -21,6 +21,27 @@ water_leak_sensors:
 lights_family_kitchen:
   name: Family Kitchen Lights
   entities:
-    - light.mantle_light
     - light.lights_china_cabinet
     - light.kitchen_spotlight
+    - light.lights_familyroom_mantle
+
+lights.garage_hallway:
+  name: Garage Hallway Lights
+  entities:
+    - light.garage_hallway
+    - light.garage_hallway_2
+    - switch.laundryroom
+
+lights.upstairs:
+  name: Upstairs Lights
+  entities:
+    - light.upstairs_lights
+    - lights.garage_hallway
+
+all_devices:
+  name: All Devices
+  entities:
+    - brian_phone
+    - kathryn_phone
+    - graham_phone
+    - madelyn_phone
