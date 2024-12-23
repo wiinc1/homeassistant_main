@@ -45,3 +45,18 @@ all_devices:
     - kathryn_phone
     - graham_phone
     - madelyn_phone
+
+vacuum_rooms:
+  name: Vacuum Rooms
+  entities:
+    - switch.swv_closet
+    - switch.swv_laundry
+    - switch.swv_bedroom
+    - switch.swv_familyroom
+    - switch.swv_kitchen
+    - switch.swv_entryway
+    - switch.swv_garageentry
+    - switch.swv_kitchentable
+    - switch.swv_masterbedroom
+    - switch.swv_masterbathroom
+    - switch.swv_office

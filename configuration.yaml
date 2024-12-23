@@ -59,3 +59,27 @@ input_boolean:
     initial: off
 
 input_button: !include inputs/buttons.yaml
+
+# used in the vacuum automation - vacuum_smart_rotation
+# Create counters for each room
+counter:
+  vacuum_entryway_count:
+    name: Entryway Clean Count
+    initial: 0
+    step: 1
+  vacuum_office_count:
+    name: Office Clean Count
+    initial: 0
+    step: 1
+  vacuum_laundry_count:
+    name: Laundry Clean Count
+    initial: 0
+    step: 1
+  vacuum_kitchen_count:
+    name: Kitchen Clean Count
+    initial: 0
+    step: 1
+  vacuum_kitchentable_count:
+    name: Kitchen Table Clean Count
+    initial: 0
+    step: 1
