@@ -63,23 +63,47 @@ input_button: !include inputs/buttons.yaml
 # used in the vacuum automation - vacuum_smart_rotation
 # Create counters for each room
 counter:
-  vacuum_entryway_count:
-    name: Entryway Clean Count
-    initial: 0
-    step: 1
-  vacuum_office_count:
-    name: Office Clean Count
+  vacuum_closet_count:
+    name: Closet Clean Count
     initial: 0
     step: 1
   vacuum_laundry_count:
     name: Laundry Clean Count
     initial: 0
     step: 1
+  vacuum_bedroom_count:
+    name: Bedroom Clean Count
+    initial: 0
+    step: 1
+  vacuum_familyroom_count:
+    name: Family Room Clean Count
+    initial: 0
+    step: 1
   vacuum_kitchen_count:
     name: Kitchen Clean Count
     initial: 0
     step: 1
+  vacuum_entryway_count:
+    name: Entryway Clean Count
+    initial: 0
+    step: 1
+  vacuum_garageentry_count:
+    name: Garage Entry Clean Count
+    initial: 0
+    step: 1
   vacuum_kitchentable_count:
     name: Kitchen Table Clean Count
+    initial: 0
+    step: 1
+  vacuum_masterbedroom_count:
+    name: Master Bedroom Clean Count
+    initial: 0
+    step: 1
+  vacuum_masterbathroom_count:
+    name: Master Bathroom Clean Count
+    initial: 0
+    step: 1
+  vacuum_office_count:
+    name: Office Clean Count
     initial: 0
     step: 1
