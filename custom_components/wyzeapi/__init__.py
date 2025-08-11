@@ -1,23 +1,33 @@
 """The Wyze Home Assistant Integration."""
+
 from __future__ import annotations
 
-import asyncio
 import logging
 
-from homeassistant.config_entries import ConfigEntry, SOURCE_IMPORT
+from aiohttp.client_exceptions import ClientConnectorError
+from homeassistant.config_entries import ConfigEntry, ConfigEntryNotReady, SOURCE_IMPORT
 from homeassistant.const import CONF_USERNAME, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.check_config import HomeAssistantConfig
 from wyzeapy import Wyzeapy
+from wyzeapy.exceptions import AccessTokenError
 from wyzeapy.wyze_auth_lib import Token
 
 from .const import (
-    DOMAIN, CONF_CLIENT, ACCESS_TOKEN, REFRESH_TOKEN,
-    REFRESH_TIME, WYZE_NOTIFICATION_TOGGLE, BULB_LOCAL_CONTROL,
-    DEFAULT_LOCAL_CONTROL, KEY_ID, API_KEY
+    DOMAIN,
+    CONF_CLIENT,
+    ACCESS_TOKEN,
+    REFRESH_TOKEN,
+    REFRESH_TIME,
+    WYZE_NOTIFICATION_TOGGLE,
+    BULB_LOCAL_CONTROL,
+    DEFAULT_LOCAL_CONTROL,
+    KEY_ID,
+    API_KEY,
 )
+from .coordinator import WyzeLockBoltCoordinator
 from .token_manager import TokenManager
 
 PLATFORMS = [
@@ -27,14 +37,17 @@ PLATFORMS = [
     "climate",
     "alarm_control_panel",
     "sensor",
-    "siren"
+    "siren",
+    "cover",
+    "number",
+    "button"
 ]  # Fixme: Re add scene
 _LOGGER = logging.getLogger(__name__)
 
 
 # noinspection PyUnusedLocal
 async def async_setup(
-        hass: HomeAssistant, config: HomeAssistantConfig, discovery_info=None
+    hass: HomeAssistant, config: HomeAssistantConfig, discovery_info=None
 ):
     # pylint: disable=unused-argument
     """Set up the WyzeApi domain."""
@@ -74,7 +87,7 @@ async def async_setup(
                     REFRESH_TOKEN: domainconfig[REFRESH_TOKEN],
                     REFRESH_TIME: domainconfig[REFRESH_TIME],
                     KEY_ID: domainconfig[KEY_ID],
-                    API_KEY: domainconfig[API_KEY]
+                    API_KEY: domainconfig[API_KEY],
                 },
             )
         )
@@ -110,14 +123,23 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             api_key,
             token,
         )
-    except Exception as e:
-        _LOGGER.error("Wyzeapi: Could not login. Please re-login through integration configuration")
+    except ClientConnectorError as e:
+        raise ConfigEntryNotReady("Unable to login due to network issues.") from e
+    except AccessTokenError as e:
+        _LOGGER.error(
+            "Wyzeapi: Could not login. Please re-login through integration configuration"
+        )
         _LOGGER.error(e)
         raise ConfigEntryAuthFailed("Unable to login, please re-login.") from None
 
     hass.data[DOMAIN][config_entry.entry_id] = {CONF_CLIENT: client, "key_id": KEY_ID, "api_key": API_KEY}
+    await setup_coordinators(hass, config_entry, client)
 
-    options_dict = {BULB_LOCAL_CONTROL: config_entry.options.get(BULB_LOCAL_CONTROL, DEFAULT_LOCAL_CONTROL)}
+    options_dict = {
+        BULB_LOCAL_CONTROL: config_entry.options.get(
+            BULB_LOCAL_CONTROL, DEFAULT_LOCAL_CONTROL
+        )
+    }
     hass.config_entries.async_update_entry(config_entry, options=options_dict)
 
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
@@ -133,7 +155,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     device_registry = dr.async_get(hass)
     for device in dr.async_entries_for_config_entry(
-            device_registry, config_entry.entry_id
+        device_registry, config_entry.entry_id
     ):
         for identifier in device.identifiers:
             # domain has to remain here. If it is removed the integration will remove all entities for not being in
@@ -141,15 +163,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             domain, mac = identifier
             if mac not in mac_addresses:
                 _LOGGER.warning(
-                    '%s is not in the mac_addresses list, removing the entry', mac
+                    "%s is not in the mac_addresses list, removing the entry", mac
                 )
                 device_registry.async_remove_device(device.id)
     return True
 
 
-async def options_update_listener(
-        hass: HomeAssistant, config_entry: ConfigEntry
-):
+async def options_update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
     """Handle options update."""
     _LOGGER.debug("Updated options")
     entry_data = config_entry.as_dict().get("data")
@@ -165,3 +185,11 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
 
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+async def setup_coordinators(hass: HomeAssistant, config_entry: ConfigEntry, client: Wyzeapy):
+    lock_service = await client.lock_service
+    for lock in await lock_service.get_locks():
+        if lock.product_model == "YD_BT1":
+            coordinators = hass.data[DOMAIN][config_entry.entry_id].setdefault("coordinators", {})
+            coordinators[lock.mac] = WyzeLockBoltCoordinator(hass, lock_service, lock)
+            await coordinators[lock.mac].update_lock_info()

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 """Platform for light integration."""
+
 from abc import ABC
 from datetime import timedelta
 import logging
@@ -17,6 +18,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers import device_registry as dr
 from homeassistant.exceptions import HomeAssistantError
 
@@ -30,8 +32,11 @@ MAX_OUT_OF_SYNC_COUNT = 5
 
 
 @token_exception_handler
-async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry,
-                            async_add_entities: Callable[[List[Any], bool], None]) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: Callable[[List[Any], bool], None],
+) -> None:
     """
     This function sets up the config_entry
 
@@ -45,9 +50,17 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry,
     client: Wyzeapy = hass.data[DOMAIN][config_entry.entry_id][CONF_CLIENT]
     lock_service = await client.lock_service
 
-    locks = [WyzeLock(lock_service, lock) for lock in await lock_service.get_locks()]
+    all_locks = await lock_service.get_locks()
 
-    async_add_entities(locks, True)
+    locks = [WyzeLock(lock_service, lock) for lock in all_locks
+             if lock.product_model != "YD_BT1"]
+    lock_bolts = []
+    for lock in all_locks:
+        if lock.product_model == "YD_BT1":
+            coordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinators"][lock.mac]
+            lock_bolts.append(WyzeLockBolt(coordinator))
+
+    async_add_entities(locks + lock_bolts, True)
 
 
 class WyzeLock(homeassistant.components.lock.LockEntity, ABC):
@@ -56,9 +69,7 @@ class WyzeLock(homeassistant.components.lock.LockEntity, ABC):
     def __init__(self, lock_service: LockService, lock: Lock):
         """Initialize a Wyze lock."""
         self._lock = lock
-        if self._lock.type not in [
-            DeviceTypes.LOCK
-        ]:
+        if self._lock.type not in [DeviceTypes.LOCK]:
             raise AttributeError("Device type not supported")
 
         self._lock_service = lock_service
@@ -68,9 +79,7 @@ class WyzeLock(homeassistant.components.lock.LockEntity, ABC):
     @property
     def device_info(self):
         return {
-            "identifiers": {
-                (DOMAIN, self._lock.mac)
-            },
+            "identifiers": {(DOMAIN, self._lock.mac)},
             "name": self._lock.nickname,
             "connections": {
                 (
@@ -79,7 +88,7 @@ class WyzeLock(homeassistant.components.lock.LockEntity, ABC):
                 )
             },
             "manufacturer": "WyzeLabs",
-            "model": self._lock.product_model
+            "model": self._lock.product_model,
         }
 
     def lock(self, **kwargs):
@@ -149,7 +158,9 @@ class WyzeLock(homeassistant.components.lock.LockEntity, ABC):
 
         # Add the keypad's battery value if it exists
         if self._lock.raw_dict.get("keypad", {}).get("power"):
-            dev_info["keypad_battery"] = str(self._lock.raw_dict.get("keypad", {}).get("power"))
+            dev_info["keypad_battery"] = str(
+                self._lock.raw_dict.get("keypad", {}).get("power")
+            )
 
         return dev_info
 
@@ -163,7 +174,10 @@ class WyzeLock(homeassistant.components.lock.LockEntity, ABC):
         This function updates the entity
         """
         lock = await self._lock_service.update(self._lock)
-        if lock.unlocked == self._lock.unlocked or self._out_of_sync_count >= MAX_OUT_OF_SYNC_COUNT:
+        if (
+            lock.unlocked == self._lock.unlocked
+            or self._out_of_sync_count >= MAX_OUT_OF_SYNC_COUNT
+        ):
             self._lock = lock
             self._out_of_sync_count = 0
         else:
@@ -189,3 +203,68 @@ class WyzeLock(homeassistant.components.lock.LockEntity, ABC):
 
     async def async_will_remove_from_hass(self) -> None:
         self._lock_service.unregister_updater(self._lock)
+
+
+
+class WyzeLockBolt(CoordinatorEntity, homeassistant.components.lock.LockEntity):
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self._lock = coordinator._lock
+
+    @property
+    def name(self):
+        """Return the display name of this lock."""
+        return self._lock.nickname
+
+    @property
+    def unique_id(self):
+        return self._lock.mac
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {
+                (DOMAIN, self._lock.mac)
+            },
+            "name": self._lock.nickname,
+            "connections": {
+                (
+                    dr.CONNECTION_NETWORK_MAC,
+                    self.coordinator._mac,
+                ),
+                (
+                    "uuid",
+                    self.coordinator._uuid
+                ),
+                (
+                    "serial_number",
+                    self._lock.raw_dict["hardware_info"]["sn"]
+                )
+            },
+            "manufacturer": "WyzeLabs",
+            "model": self._lock.product_model
+        }
+
+    @property
+    def is_locked(self):
+        return self.coordinator.data["state"] == 1
+
+    async def async_lock(self, **kwargs):
+        return await self.coordinator.lock_unlock(command="lock")
+    
+    async def async_unlock(self, **kwargs):
+        return await self.coordinator.lock_unlock(command="unlock")
+
+    @property
+    def is_locking(self, **kwargs):
+        return self.coordinator._current_command == "lock"
+
+    @property
+    def is_unlocking(self, **kwargs):
+        return self.coordinator._current_command == "unlock"
+
+    @property
+    def state_attributes(self):
+        return {
+            "last_operated": self.coordinator.data["timestamp"]
+        }

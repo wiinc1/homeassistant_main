@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from gasbuddy import GasBuddy  # pylint: disable=import-self
 
@@ -18,6 +18,7 @@ from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
+    CONF_GPS,
     CONF_INTERVAL,
     CONF_STATION_ID,
     CONF_UOM,
@@ -28,6 +29,7 @@ from .const import (
     PLATFORMS,
     VERSION,
 )
+from .services import GasBuddyServices
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,6 +54,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     updated_config = config_entry.data.copy()
     if CONF_UOM not in config_entry.data.keys():
         updated_config[CONF_UOM] = True
+    if CONF_GPS not in config_entry.data.keys():
+        updated_config[CONF_GPS] = True
 
     if updated_config != config_entry.data:
         hass.config_entries.async_update_entry(config_entry, data=updated_config)
@@ -68,6 +72,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     hass.data[DOMAIN][config_entry.entry_id] = {COORDINATOR: coordinator}
 
+    services = GasBuddyServices(hass, config_entry)
+    services.async_register()
+
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
     return True
 
@@ -80,6 +87,7 @@ async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry) -> Non
 
     original_config[CONF_INTERVAL] = config_entry.options[CONF_INTERVAL]
     original_config[CONF_UOM] = config_entry.options[CONF_UOM]
+    original_config[CONF_GPS] = config_entry.options[CONF_GPS]
 
     hass.config_entries.async_update_entry(
         entry=config_entry,
@@ -102,6 +110,10 @@ async def async_migrate_entry(hass, config_entry) -> bool:
         # Add default unit of measure setting if missing
         if CONF_UOM not in updated_config.keys():
             updated_config[CONF_UOM] = True
+
+    if version < 5:
+        if CONF_GPS not in updated_config.keys():
+            updated_config[CONF_GPS] = True
 
     if updated_config != config_entry.data:
         hass.config_entries.async_update_entry(
@@ -151,16 +163,22 @@ class GasBuddyUpdateCoordinator(DataUpdateCoordinator):
         self.hass = hass
         self.interval = timedelta(seconds=interval)
         self._data = {}
+        self._api = GasBuddy(station_id=config.data[CONF_STATION_ID])
 
         _LOGGER.debug("Data will be update every %s", self.interval)
 
-        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=self.interval)
+        super().__init__(
+            hass,
+            _LOGGER,
+            config_entry=config,
+            name=DOMAIN,
+            update_interval=self.interval,
+        )
 
     async def _async_update_data(self) -> dict:
         """Update data via library."""
-        station = self._config.data[CONF_STATION_ID]
         try:
-            self._data = await GasBuddy(station_id=station).price_lookup()
+            self._data = await self._api.price_lookup()
         except APIError:
             _LOGGER.error("API error when retreiving data.")
             self._data = {}
@@ -170,4 +188,5 @@ class GasBuddyUpdateCoordinator(DataUpdateCoordinator):
         except Exception as exception:
             raise UpdateFailed() from exception
 
+        self._data["last_updated"] = datetime.now(timezone.utc)
         return self._data

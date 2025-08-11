@@ -1,7 +1,3 @@
-alias: "Vacuum - Smart Room Rotation"
-trigger:
-  - platform: time_pattern
-    hours: "/1"
 condition:
   - condition: or
     conditions:
@@ -11,11 +7,11 @@ condition:
             after: "10:00:00"
             before: "17:00:00"
           - condition: state
-            entity_id: device_tracker.kathryn_phone
-            state: "not_home"
+            entity_id: device_tracker.brian_phone
+            state: "home"
           - condition: state
-            entity_id: device_tracker.madelyn_phone
-            state: "not_home"
+            entity_id: device_tracker.graham_phone
+            state: "home"
       - condition: and
         conditions:
           - condition: state
@@ -30,39 +26,3 @@ condition:
           - condition: state
             entity_id: device_tracker.brian_phone
             state: "not_home"
-action:
-  # Get room with lowest count
-  - variables:
-      room_counts: >
-        {% set counts = {
-          'switch.swv_closet': states('counter.vacuum_closet_count') | int,
-          'switch.swv_laundry': states('counter.vacuum_laundry_count') | int,
-          'switch.swv_bedroom': states('counter.vacuum_bedroom_count') | int,
-          'switch.swv_familyroom': states('counter.vacuum_familyroom_count') | int,
-          'switch.swv_kitchen': states('counter.vacuum_kitchen_count') | int,
-          'switch.swv_entryway': states('counter.vacuum_entryway_count') | int,
-          'switch.swv_garageentry': states('counter.vacuum_garageentry_count') | int,
-          'switch.swv_kitchentable': states('counter.vacuum_kitchentable_count') | int,
-          'switch.swv_masterbedroom': states('counter.vacuum_masterbedroom_count') | int,
-          'switch.swv_masterbathroom': states('counter.vacuum_masterbathroom_count') | int,
-          'switch.swv_office': states('counter.vacuum_office_count') | int
-        } %}
-        {{ counts }}
-      next_room: >
-        {% set min_count = room_counts.values() | min %}
-        {% set eligible_rooms = room_counts | dict2items | selectattr('value', 'eq', min_count) | list %}
-        {{ eligible_rooms | random | attr('key') }}
-
-  # Start vacuum in selected room
-  - service: simple_wyze_vac.sweep_rooms
-    data:
-      entity_id: vacuum.first_floor_vacuum
-      rooms:
-        - "{{ next_room }}"
-
-  # Increment room count
-  - service: counter.increment
-    target:
-      entity_id: "counter.vacuum_{{ next_room[10:] }}_count"
-
-mode: single

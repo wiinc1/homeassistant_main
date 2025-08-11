@@ -12,6 +12,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     ATTR_IMAGEURL,
+    CONF_GPS,
     CONF_NAME,
     CONF_STATION_ID,
     CONF_UOM,
@@ -56,8 +57,10 @@ class GasBuddySensor(
         self._data = coordinator.data
         self.coordinator = coordinator
         self._state = None
-        self._icon = sensor_description.icon
         self._cash = sensor_description.cash
+        self._price = sensor_description.price
+
+        self._attr_icon = sensor_description.icon
         self._attr_name = f"{self._config.data[CONF_NAME]} {self._name}"
         self._attr_unique_id = f"{self._name}_{self._unique_id}"
 
@@ -79,13 +82,21 @@ class GasBuddySensor(
         if data is None:
             self._state = None
         if self._type in data.keys():
+            if not self._price:
+                return data[self._type]
             if self._cash and "cash_price" in data[self._type]:
-                if self.coordinator.data["unit_of_measure"] == "cents_per_liter":
+                if (
+                    data["unit_of_measure"] == "cents_per_liter"
+                    and data[self._type]["cash_price"]
+                ):
                     self._state = data[self._type]["cash_price"] / 100
                 else:
                     self._state = data[self._type]["cash_price"]
             else:
-                if self.coordinator.data["unit_of_measure"] == "cents_per_liter":
+                if (
+                    data["unit_of_measure"] == "cents_per_liter"
+                    and data[self._type]["price"]
+                ):
                     self._state = data[self._type]["price"] / 100
                 else:
                     self._state = data[self._type]["price"]
@@ -98,23 +109,26 @@ class GasBuddySensor(
         """Return the unit of measurement."""
         uom = self.coordinator.data["unit_of_measure"]
         currency = self.coordinator.data["currency"]
-        if self._config.data[CONF_UOM]:
+        if self._config.data[CONF_UOM] and self._price:
             if uom is not None and currency is not None:
                 return f"{currency}/{UNIT_OF_MEASURE[uom]}"
-        elif currency is not None:
+        elif currency is not None and self._price:
             return currency
         return None
 
     @property
     def extra_state_attributes(self) -> Optional[dict]:
         """Return sesnsor attributes."""
+        if not self._price:
+            return None
         credit = self.coordinator.data[self._type]["credit"]
         attrs = {}
         attrs[ATTR_ATTRIBUTION] = f"{credit} via GasBuddy"
         attrs["last_updated"] = self.coordinator.data[self._type]["last_updated"]
         attrs[CONF_STATION_ID] = self.coordinator.data[CONF_STATION_ID]
-        attrs[ATTR_LATITUDE] = self.coordinator.data[ATTR_LATITUDE]
-        attrs[ATTR_LONGITUDE] = self.coordinator.data[ATTR_LONGITUDE]
+        if self._config.data[CONF_GPS]:
+            attrs[ATTR_LATITUDE] = self.coordinator.data[ATTR_LATITUDE]
+            attrs[ATTR_LONGITUDE] = self.coordinator.data[ATTR_LONGITUDE]
         return attrs
 
     @property
@@ -126,11 +140,6 @@ class GasBuddySensor(
         ):
             return self.coordinator.data[ATTR_IMAGEURL]
         return None
-
-    @property
-    def icon(self) -> str:
-        """Return the icon."""
-        return self._icon
 
     @property
     def available(self) -> bool:

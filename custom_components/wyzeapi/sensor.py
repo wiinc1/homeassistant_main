@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 """Platform for sensor integration."""
 
 import logging
@@ -11,6 +9,7 @@ from wyzeapy import Wyzeapy
 from wyzeapy.services.camera_service import Camera
 from wyzeapy.services.lock_service import Lock
 from wyzeapy.services.switch_service import Switch, SwitchUsageService
+from wyzeapy.services.irrigation_service import IrrigationService, Irrigation
 
 from homeassistant.components.sensor import (
     SensorEntity,
@@ -23,14 +22,19 @@ from homeassistant.const import (
     ATTR_ATTRIBUTION,
     PERCENTAGE,
     UnitOfEnergy,
+    EntityCategory,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
 )
-from homeassistant.helpers.event import async_track_state_change_event, async_track_time_change
+from homeassistant.helpers.event import (
+    async_track_state_change_event,
+    async_track_time_change,
+)
 from homeassistant.helpers.entity_registry import async_get
+from homeassistant.helpers.entity import DeviceInfo
 
 from .const import CONF_CLIENT, DOMAIN, LOCK_UPDATED, CAMERA_UPDATED
 from .token_manager import token_exception_handler
@@ -62,6 +66,7 @@ async def async_setup_entry(
     lock_service = await client.lock_service
     camera_service = await client.camera_service
     switch_usage_service = await client.switch_usage_service
+    irrigation_service = await client.irrigation_service
 
     locks = await lock_service.get_locks()
     sensors = []
@@ -82,6 +87,19 @@ async def async_setup_entry(
             sensors.append(WyzePlugEnergySensor(plug, switch_usage_service))
             sensors.append(WyzePlugDailyEnergySensor(plug))
 
+    # Get all irrigation devices
+    irrigation_devices = await irrigation_service.get_irrigations()
+    
+    # Create sensor entities for each irrigation device
+    for device in irrigation_devices:
+        # Update the device to get its properties
+        device = await irrigation_service.update(device)
+        sensors.extend([
+            WyzeIrrigationRSSI(irrigation_service, device),
+            WyzeIrrigationIP(irrigation_service, device),
+            WyzeIrrigationSSID(irrigation_service, device),
+        ])
+
     async_add_entities(sensors, True)
 
 
@@ -97,8 +115,6 @@ class WyzeLockBatterySensor(SensorEntity):
 
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_native_unit_of_measurement = PERCENTAGE
-
-
 
     def __init__(self, lock, battery_type):
         self._enabled = None
@@ -164,16 +180,14 @@ class WyzeLockBatterySensor(SensorEntity):
     @property
     def device_info(self):
         return {
-            "identifiers": {
-                (DOMAIN, self._lock.mac)
-            },
+            "identifiers": {(DOMAIN, self._lock.mac)},
             "connections": {
                 (
                     dr.CONNECTION_NETWORK_MAC,
                     self._lock.mac,
                 )
             },
-            "name": f"{self._lock.nickname}.{self._battery_type}"
+            "name": f"{self._lock.nickname}.{self._battery_type}",
         }
 
     @property
@@ -237,9 +251,7 @@ class WyzeCameraBatterySensor(SensorEntity):
     def device_info(self):
         """Return the device info."""
         return {
-            "identifiers": {
-                (DOMAIN, self._camera.mac)
-            },
+            "identifiers": {(DOMAIN, self._camera.mac)},
             "connections": {
                 (
                     dr.CONNECTION_NETWORK_MAC,
@@ -248,7 +260,7 @@ class WyzeCameraBatterySensor(SensorEntity):
             },
             "name": self._camera.nickname,
             "model": self._camera.product_model,
-            "manufacturer": "WyzeLabs"
+            "manufacturer": "WyzeLabs",
         }
 
     @property
@@ -314,7 +326,9 @@ class WyzePlugEnergySensor(RestoreSensor):
         _now = int(datetime.utcnow().hour)
         self._hourly_energy_usage_added = 0
 
-        if self._switch.usage_history and len(self._switch.usage_history) > 0:  # Confirm there is data
+        if (
+            self._switch.usage_history and len(self._switch.usage_history) > 0
+        ):  # Confirm there is data
             _raw_data = self._switch.usage_history
             _LOGGER.debug(_raw_data)
             _current_day_list = json.loads(_raw_data[0]["data"])
@@ -440,7 +454,7 @@ class WyzePlugDailyEnergySensor(RestoreSensor):
         if not old_state or not new_state:
             return
 
-        updated_energy = (float(new_state.state) - float(old_state.state))
+        updated_energy = float(new_state.state) - float(old_state.state)
         self._attr_native_value += updated_energy
         self.async_write_ha_state()
 
@@ -460,20 +474,130 @@ class WyzePlugDailyEnergySensor(RestoreSensor):
             self._attr_native_value = 0
 
         registry = async_get(self.hass)
-        entity_id_total_sensor = registry.async_get_entity_id("sensor", DOMAIN, f"{self._switch.nickname}.energy-{self._switch.mac}")
+        entity_id_total_sensor = registry.async_get_entity_id(
+            "sensor", DOMAIN, f"{self._switch.nickname}.energy-{self._switch.mac}"
+        )
 
         self.async_on_remove(
             async_track_state_change_event(
-                self.hass,
-                [entity_id_total_sensor],
-                self._update_daily_sensor
+                self.hass, [entity_id_total_sensor], self._update_daily_sensor
             )
         )
 
         self.async_on_remove(
             async_track_time_change(
-                self.hass,
-                self._async_reset_at_midnight,
-                hour=0, minute=0, second=0
+                self.hass, self._async_reset_at_midnight, hour=0, minute=0, second=0
             )
         )
+
+
+class WyzeIrrigationBaseSensor(SensorEntity):
+    """Base class for Wyze Irrigation sensors."""
+
+    _attr_has_entity_name = True
+    _attr_should_poll = False
+
+    def __init__(self, irrigation_service: IrrigationService, irrigation: Irrigation) -> None:
+        """Initialize the irrigation base sensor."""
+        self._irrigation_service = irrigation_service
+        self._device = irrigation
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information about this entity."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._device.mac)},
+            name=self._device.nickname,
+            manufacturer="WyzeLabs",
+            model=self._device.product_model,
+            serial_number=self._device.sn,
+            connections={(dr.CONNECTION_NETWORK_MAC, self._device.mac)},
+        )
+
+    @callback
+    def async_update_callback(self, irrigation: Irrigation) -> None:
+        """Update the irrigation's state."""
+        self._device = self._irrigation_service.update_device_props(irrigation)
+        self.async_schedule_update_ha_state()
+
+    async def async_added_to_hass(self) -> None:
+        """Subscribe to updates."""
+        self._device.callback_function = self.async_update_callback
+        self._irrigation_service.register_updater(self._device, 30)
+        await self._irrigation_service.start_update_manager()
+        return await super().async_added_to_hass()
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Clean up when removed."""
+        self._irrigation_service.unregister_updater(self._device)
+
+
+class WyzeIrrigationRSSI(WyzeIrrigationBaseSensor):
+    """Representation of a Wyze Irrigation RSSI sensor."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+
+    @property
+    def name(self) -> str:
+        """Return the name of the sensor."""
+        return "RSSI"
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID for the sensor."""
+        return f"{self._device.mac}-rssi"
+
+    @property
+    def native_value(self) -> int:
+        """Return the RSSI value."""
+        return self._device.RSSI
+
+    @property
+    def native_unit_of_measurement(self) -> str:
+        """Return the unit of measurement."""
+        return "dBm"
+
+
+class WyzeIrrigationIP(WyzeIrrigationBaseSensor):
+    """Representation of a Wyze Irrigation IP sensor."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+
+    @property
+    def name(self) -> str:
+        """Return the name of the sensor."""
+        return "IP Address"
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID for the sensor."""
+        return f"{self._device.mac}-ip"
+
+    @property
+    def native_value(self) -> str:
+        """Return the IP address."""
+        return self._device.IP
+
+
+class WyzeIrrigationSSID(WyzeIrrigationBaseSensor):
+    """Representation of a Wyze Irrigation SSID sensor."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+
+    @property
+    def name(self) -> str:
+        """Return the name of the sensor."""
+        return "SSID"
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID for the sensor."""
+        return f"{self._device.mac}-ssid"
+
+    @property
+    def native_value(self) -> str:
+        """Return the SSID."""
+        return self._device.ssid

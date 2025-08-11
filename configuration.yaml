@@ -4,7 +4,7 @@ homeassistant:
   latitude: !secret latitude
   longitude: !secret longitude
   elevation: !secret elevation
-  unit_system: imperial
+  unit_system: us_customary 
   time_zone: America/New_York
   packages: !include_dir_named packages
 
@@ -16,7 +16,7 @@ scene: !include scenes.yaml
 group: !include groups.yaml
 
 # Integrations
-device_tracker: !include integrations/device_tracker.yaml
+# device_tracker: !include integrations/device_tracker.yaml
 # zwave: !include integrations/zwave.yaml
 mqtt: !include integrations/mqtt.yaml
 

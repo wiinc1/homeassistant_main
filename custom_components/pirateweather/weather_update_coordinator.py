@@ -6,6 +6,7 @@ from http.client import HTTPException
 
 import aiohttp
 import async_timeout
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
@@ -21,12 +22,24 @@ ATTRIBUTION = "Powered by Pirate Weather"
 class WeatherUpdateCoordinator(DataUpdateCoordinator):
     """Weather data update coordinator."""
 
-    def __init__(self, api_key, latitude, longitude, pw_scan_Int, hass):
+    def __init__(
+        self,
+        api_key,
+        latitude,
+        longitude,
+        scan_interval,
+        language,
+        endpoint,
+        hass,
+        config_entry: ConfigEntry,
+    ):
         """Initialize coordinator."""
         self._api_key = api_key
         self.latitude = latitude
         self.longitude = longitude
-        self.pw_scan_Int = pw_scan_Int
+        self.scan_interval = scan_interval
+        self.language = language
+        self.endpoint = endpoint
         self.requested_units = "si"
 
         self.data = None
@@ -35,7 +48,13 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         self.daily = None
         self._connect_error = False
 
-        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=pw_scan_Int)
+        super().__init__(
+            hass,
+            _LOGGER,
+            name=DOMAIN,
+            update_interval=scan_interval,
+            config_entry=config_entry,
+        )
 
     async def _async_update_data(self):
         """Update the data."""
@@ -61,7 +80,8 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
             requestLongitude = self.longitude
 
         forecastString = (
-            "https://api.pirateweather.net/forecast/"
+            self.endpoint
+            + "/forecast/"
             + self._api_key
             + "/"
             + str(requestLatitude)
@@ -71,6 +91,8 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
             + self.requested_units
             + "&extend=hourly"
             + "&version=2"
+            + "&lang="
+            + self.language
         )
 
         async with (
@@ -82,6 +104,6 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
             headers = resp.headers
             status = resp.raise_for_status()
 
-            _LOGGER.debug("Pirate Weather data update")
+            _LOGGER.debug("Pirate Weather data update from: %s", self.endpoint)
 
             return Forecast(jsonText, status, headers)

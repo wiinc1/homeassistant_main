@@ -25,18 +25,18 @@ lights_family_kitchen:
     - light.kitchen_spotlight
     - light.lights_familyroom_mantle
 
-lights.garage_hallway:
+lights_garage_hallway:
   name: Garage Hallway Lights
   entities:
     - light.garage_hallway
     - light.garage_hallway_2
     - switch.laundryroom
 
-lights.upstairs:
+lights_upstairs:
   name: Upstairs Lights
   entities:
     - light.upstairs_lights
-    - lights.garage_hallway
+    - lights_garage_hallway
 
 all_devices:
   name: All Devices

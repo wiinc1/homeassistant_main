@@ -3,6 +3,8 @@ from homeassistant.helpers.selector import (
     SelectSelector,
     SelectSelectorConfig,
     SelectSelectorMode,
+    LabelSelector,
+    LabelSelectorConfig
 )
 import re
 import logging
@@ -15,7 +17,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 class PresenceSimulationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 3
+    VERSION = 5
     data = None
     async def async_create_flow(handler, context, data):
             """Create flow."""
@@ -28,11 +30,13 @@ class PresenceSimulationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         data_schema = {
             vol.Required("switch", description={"suggested_value": "Choose a unique name"}): str,
             vol.Required("entities"): SelectSelector(SelectSelectorConfig(options=all_entities, multiple=True, mode=SelectSelectorMode.DROPDOWN)),
+            vol.Required("labels"): LabelSelector(LabelSelectorConfig(multiple=True)),
             vol.Required("delta", default=7): int,
             vol.Required("interval", default=30): int,
             vol.Required("restore", default=False): bool,
             vol.Required("random", default=0): int,
             vol.Required("unavailable_as_off", default=False): bool,
+            vol.Required("brightness", default=0): int,
         }
         if not info:
             return self.async_show_form(
@@ -50,6 +54,7 @@ class PresenceSimulationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.data = info
         try:
             _LOGGER.debug("info.entities %s",info['entities'])
+            _LOGGER.debug("info.labels %s",info['labels'])
             #check if entity exist
             #hass.states.get(info['entities'])
         except Exception as e:
@@ -92,15 +97,21 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             unavailable_as_off = self.config_entry.data["unavailable_as_off"]
         else:
             unavailable_as_off = False
+        if "brightness" in self.config_entry.data:
+            brightness = self.config_entry.data["brightness"]
+        else:
+            brightness = 0
 
         data_schema = {
             vol.Required("switch", default=self.config_entry.data["switch"]): str,
             vol.Required("entities", default=self.config_entry.data["entities"].split(",")): SelectSelector(SelectSelectorConfig(options=all_entities, multiple=True, mode=SelectSelectorMode.DROPDOWN)),
+            vol.Required("labels", default=self.config_entry.data["labels"]): LabelSelector(LabelSelectorConfig(multiple=True)),
             vol.Required("delta", default=self.config_entry.data["delta"]): int,
             vol.Required("interval", default=interval): int,
             vol.Required("restore", default=restore): bool,
             vol.Required("random", default=random): int,
             vol.Required("unavailable_as_off", default=unavailable_as_off): bool,
+            vol.Required("brightness", default=brightness): int,
         }
         _LOGGER.debug("switch %s", self.config_entry.data["switch"])
         _LOGGER.debug("config_entry data %s", self.config_entry.data)

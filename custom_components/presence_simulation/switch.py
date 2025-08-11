@@ -60,11 +60,16 @@ class PresenceSimulationSwitch(SwitchEntity,RestoreEntity):
         for elm in conf["entities"].split(","):
             elms += [elm.strip()]
         self._entities = elms
+        if "labels" in conf:
+            self._labels = conf["labels"]
+        else:
+            self._labels = []
         self._random = int(conf["random"])
         self._interval = int(conf["interval"])
         self._delta = conf["delta"]
         self._restore = conf["restore"]
         self._unavailable_as_off = conf.get("unavailable_as_off", False)
+        self._brightness = conf.get("brightness", 0)
         self.reset_default_values()
         _LOGGER.debug("entities %s", conf["entities"])
 
@@ -133,6 +138,9 @@ class PresenceSimulationSwitch(SwitchEntity,RestoreEntity):
                     del self.attr[prop]
 
     @property
+    def labels(self):
+        return self._labels_overriden
+    @property
     def entities(self):
         return self._entities_overriden
     @property
@@ -146,24 +154,31 @@ class PresenceSimulationSwitch(SwitchEntity,RestoreEntity):
         return self._restore_overriden
     @property
     def unavailable_as_off(self):
-        return self._unavailable_as_off
+        return self._unavailable_as_off_overriden
+    @property
+    def brightness(self):
+        return self._brightness_overriden
     @property
     def interval(self):
         return self._interval
 
     async def reset_default_values_async(self):
         self._entities_overriden = self._entities
+        self._labels_overriden = self._labels
         self._random_overriden = self._random
         self._restore_overriden = self._restore
         self._delta_overriden = self._delta
         self._unavailable_as_off_overriden = self._unavailable_as_off
+        self._brightness_overriden = self._brightness
 
     def reset_default_values(self):
         self._entities_overriden = self._entities
+        self._labels_overriden = self._labels
         self._random_overriden = self._random
         self._restore_overriden = self._restore
         self._delta_overriden = self._delta
         self._unavailable_as_off_overriden = self._unavailable_as_off
+        self._brightness_overriden = self._brightness
 
 
     #def device_state_attributes(self):
@@ -189,14 +204,18 @@ class PresenceSimulationSwitch(SwitchEntity,RestoreEntity):
                 _LOGGER.debug("State was on")
                 if "entity_id" in state.attributes:
                     self._entities_overriden = state.attributes["entity_id"]
+                if "labels" in state.attributes:
+                    self._labels_overriden = state.attributes["labels"]
                 if "random" in state.attributes:
                     self._random_overriden = state.attributes["random"]
                 if "delta" in state.attributes:
                     self._delta_overriden = state.attributes["delta"]
-                if "restore_sates" in state.attributes:
+                if "restore_states" in state.attributes:
                     self._restore_overriden = state.attributes["restore_states"]
                 if "unavailable_as_off" in state.attributes:
-                    self._unavailable_as_off = state.attributes["unavailable_as_off"]
+                    self._unavailable_as_off_overriden = state.attributes["unavailable_as_off"]
+                if "brightness" in state.attributes:
+                    self._brightness_overriden = state.attributes["brightness"]
                 #just set internally to on, the simulation service will be called later once the HA Start event is fired
                 self.internal_turn_on()
             else:
@@ -223,6 +242,11 @@ class PresenceSimulationSwitch(SwitchEntity,RestoreEntity):
         self.attr["delta"] = delta
         self._delta_overriden = delta
 
+    async def set_labels(self, labels):
+        _LOGGER.debug("overidding labels %s", labels)
+        self.attr["labels"] = labels
+        self._labels_overriden = labels
+
     async def set_entities(self, entities):
         _LOGGER.debug("overidding entities %s", entities)
         self.attr["entity_id"] = entities
@@ -236,9 +260,13 @@ class PresenceSimulationSwitch(SwitchEntity,RestoreEntity):
         self.attr["random"] = random
         self._random_overriden = random
 
-    async def set_unavailable_as_off(self, random):
-        self.attr["unavailable_as_off"] = random
-        self._unavailable_as_off = unavailable_as_off
+    async def set_unavailable_as_off(self, unavailable_as_off):
+        self.attr["unavailable_as_off"] = unavailable_as_off
+        self._unavailable_as_off_overriden = unavailable_as_off
+
+    async def set_brightness(self, brightness):
+        self.attr["brightness"] = brightness
+        self._brightness_overriden = brightness
 
     async def set_interval(self, interval):
         self._interval = interval
@@ -251,6 +279,10 @@ class PresenceSimulationSwitch(SwitchEntity,RestoreEntity):
     async def reset_delta(self):
         if "delta" in self.attr:
             del self.attr["delta"]
+
+    async def reset_labels(self):
+        if "labels" in self.attr:
+            del self.attr["labels"]
 
     async def reset_entities(self):
         if "entity_id" in self.attr:
@@ -267,3 +299,7 @@ class PresenceSimulationSwitch(SwitchEntity,RestoreEntity):
     async def reset_unavailable_as_off(self):
         if "unavailable_as_off" in self.attr:
             del self.attr["unavailable_as_off"]
+
+    async def reset_brightness(self):
+        if "brightness" in self.attr:
+            del self.attr["brightness"]

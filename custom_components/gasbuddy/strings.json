@@ -1,7 +1,8 @@
 {
     "config": {
         "error": {
-            "station_id": "Invalid station ID"
+            "station_id": "Invalid station ID",
+            "no_results": "No stations found in this area."
         },
         "step": {
             "user": {
@@ -36,7 +37,7 @@
                     "zipcode": "Postal Code (zip code)"
                 }
             },     
-            "postal_list": {
+            "station_list": {
                 "description": "Please select a station",
                 "data": {
                     "station_id": "Station"
@@ -48,7 +49,9 @@
         "step": {
             "init": {
                 "data": {
-                    "interval": "Polling interval"
+                    "interval": "Polling interval",
+                    "uom": "Show per liter/gallon in unit of measure",
+                    "gps": "Show stations on map (disable lat/long attributes)"
                 }
             }
         }

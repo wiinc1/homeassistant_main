@@ -7,7 +7,8 @@
     "import_executor": true,
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/firstof9/ha-gasbuddy/issues",
-    "requirements": ["py-gasbuddy==0.2.8"],
-  "version": "1.0.16"
+    "loggers": ["gasbuddy"],
+    "requirements": ["backoff", "py_gasbuddy==0.3.3"],
+  "version": "1.1.2"
   }
   

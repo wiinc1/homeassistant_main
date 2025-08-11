@@ -12,11 +12,13 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
+    CONF_GPS,
     CONF_INTERVAL,
     CONF_NAME,
     CONF_POSTAL,
     CONF_STATION_ID,
     CONF_UOM,
+    CONFIG_VER,
     DEFAULT_NAME,
     DOMAIN,
 )
@@ -58,6 +60,9 @@ async def _get_station_list(hass, user_input) -> list | None:
     for station in stations["data"]["locationBySearchTerm"]["stations"]["results"]:
         full_name = f'{station["name"]} @ {station["address"]["line1"]}'
         stations_list[station["id"]] = full_name
+
+    if len(stations_list) == 0:
+        stations_list["-"] = "No stations in search area."
 
     _LOGGER.debug("stations_list: %s", stations_list)
     return stations_list
@@ -117,7 +122,9 @@ def _get_schema_postal(hass: Any, user_input: list, default_dict: list) -> Any:
 
     return vol.Schema(
         {
-            vol.Required(CONF_POSTAL, default=_get_default(CONF_POSTAL)): str,
+            vol.Required(CONF_POSTAL, default=_get_default(CONF_POSTAL)): vol.Coerce(
+                str
+            ),
         }
     )
 
@@ -160,6 +167,7 @@ def _get_schema_options(hass: Any, user_input: list, default_dict: list) -> Any:
         {
             vol.Required(CONF_INTERVAL, default=_get_default(CONF_INTERVAL, 3600)): int,
             vol.Optional(CONF_UOM, default=_get_default(CONF_UOM)): bool,
+            vol.Optional(CONF_GPS, default=_get_default(CONF_GPS)): bool,
         }
     )
 
@@ -168,7 +176,7 @@ def _get_schema_options(hass: Any, user_input: list, default_dict: list) -> Any:
 class GasBuddyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for GasBuddy."""
 
-    VERSION = 2
+    VERSION = CONFIG_VER
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     def __init__(self):
@@ -190,6 +198,7 @@ class GasBuddyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             user_input[CONF_INTERVAL] = 3600
             user_input[CONF_UOM] = True
+            user_input[CONF_GPS] = True
             validate = await validate_station(user_input[CONF_STATION_ID])
             if not validate:
                 self._errors[CONF_STATION_ID] = "station_id"
@@ -229,6 +238,7 @@ class GasBuddyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             user_input[CONF_INTERVAL] = 3600
             user_input[CONF_UOM] = True
+            user_input[CONF_GPS] = True
             self._data.update(user_input)
             return self.async_create_entry(title=self._data[CONF_NAME], data=self._data)
         return await self._show_config_home(user_input)
@@ -238,6 +248,9 @@ class GasBuddyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         defaults = {}
 
         station_list = await _get_station_list(self.hass, user_input)
+
+        if "-" in station_list.keys():
+            self._errors[CONF_STATION_ID] = "no_results"
 
         return self.async_show_form(
             step_id="home",
@@ -272,6 +285,7 @@ class GasBuddyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             user_input[CONF_INTERVAL] = 3600
             user_input[CONF_UOM] = True
+            user_input[CONF_GPS] = True
             self._data.pop(CONF_POSTAL)
             self._data.update(user_input)
             return self.async_create_entry(title=self._data[CONF_NAME], data=self._data)
@@ -282,6 +296,9 @@ class GasBuddyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         defaults = {}
 
         station_list = await _get_station_list(self.hass, self._data)
+
+        if "-" in station_list.keys():
+            self._errors[CONF_STATION_ID] = "no_results"
 
         return self.async_show_form(
             step_id="station_list",
