@@ -8,6 +8,9 @@
       to: 'on'
       from: 'off'
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: not
       conditions:
         - condition: device
@@ -20,7 +23,11 @@
   action:
     - if:
         - condition: template
-          value_template: "{{ not is_state('light.basement_familyroom_light', 'unavailable') and not is_state('light.basementhallwaylight', 'unavailable') }}"
+          value_template: >
+            {{ not is_state('light.basement_familyroom_light', 'unavailable') and
+               not is_state('light.basement_familyroom_light', 'unknown') and
+               not is_state('light.basementhallwaylight', 'unavailable') and
+               not is_state('light.basementhallwaylight', 'unknown') }}
       then:
         - service: homeassistant.turn_on
           entity_id:

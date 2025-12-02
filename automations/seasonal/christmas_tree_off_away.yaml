@@ -10,15 +10,17 @@
       from: 'home'
   condition:
     - condition: state
-      entity_id: device_tracker.kathryn_phone
-      state: 'not_home'
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: state
-      entity_id: device_tracker.madelyn_phone
-      state: 'not_home'
+      entity_id: binary_sensor.anyone_home
+      state: 'off'
     - condition: template
       value_template: >
         {{ not is_state('switch.upstairsfamilyroomchristmastree', 'unavailable') and
-           not is_state('switch.basementchristmastree', 'unavailable') }}
+           not is_state('switch.upstairsfamilyroomchristmastree', 'unknown') and
+           not is_state('switch.basementchristmastree', 'unavailable') and
+           not is_state('switch.basementchristmastree', 'unknown') }}
   action:
     - if:
         condition: or

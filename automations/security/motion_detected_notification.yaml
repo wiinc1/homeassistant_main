@@ -15,8 +15,12 @@
       to: 'on'
       from: 'off'
   condition:
-    - condition: template
-      value_template: "{{ not is_state('input_boolean.vacation_mode', 'on') }}"
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.vacation_mode_active
+      state: 'off'
     - condition: template
       value_template: "{{ not is_state(trigger.entity_id, 'unavailable') and not is_state(trigger.entity_id, 'unknown') }}"
   action:
@@ -45,7 +49,11 @@
       then:
         - if:
             - condition: template
-              value_template: "{{ not is_state('light.lights_china_cabinet', 'unavailable') and not is_state('light.kitchen_spotlight', 'unavailable') }}"
+              value_template: >
+                {{ not is_state('light.lights_china_cabinet', 'unavailable') and
+                   not is_state('light.lights_china_cabinet', 'unknown') and
+                   not is_state('light.kitchen_spotlight', 'unavailable') and
+                   not is_state('light.kitchen_spotlight', 'unknown') }}
           then:
             - service: light.turn_on
               target:
@@ -54,7 +62,7 @@
                   - light.kitchen_spotlight
         - if:
             - condition: template
-              value_template: "{{ not is_state('vacuum.first_floor_vacuum', 'unavailable') }}"
+              value_template: "{{ not is_state('vacuum.first_floor_vacuum', 'unavailable') and not is_state('vacuum.first_floor_vacuum', 'unknown') }}"
           then:
             - service: vacuum.return_to_base
               target:

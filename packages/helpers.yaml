@@ -1,0 +1,23 @@
+# Helper Entities for Common Conditions
+# These input_boolean entities can be used to control automation behavior
+# and provide manual overrides when needed
+
+input_boolean:
+  # Presence helpers (can be manually overridden if needed)
+  everyone_home_override:
+    name: Everyone Home Override
+    icon: mdi:home-group
+    initial: off
+  
+  anyone_home_override:
+    name: Anyone Home Override
+    icon: mdi:home-account
+    initial: off
+  
+  # Master automation control
+  automation_enabled:
+    name: Automation Enabled
+    icon: mdi:robot
+    initial: on
+    description: "Master toggle to enable/disable all automations"
+

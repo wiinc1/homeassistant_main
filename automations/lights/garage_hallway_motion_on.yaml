@@ -10,12 +10,19 @@
       to: 'on'
       from: 'off'
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: template
       value_template: >
         {{ not is_state(trigger.entity_id, 'unavailable') and
+           not is_state(trigger.entity_id, 'unknown') and
            not is_state('light.garage_hallway_2', 'unavailable') and
+           not is_state('light.garage_hallway_2', 'unknown') and
            not is_state('light.garage_hallway', 'unavailable') and
-           not is_state('switch.laundryroom', 'unavailable') }}
+           not is_state('light.garage_hallway', 'unknown') and
+           not is_state('switch.laundryroom', 'unavailable') and
+           not is_state('switch.laundryroom', 'unknown') }}
   action:
     - choose:
         # 12AM-6AM: 35% brightness
