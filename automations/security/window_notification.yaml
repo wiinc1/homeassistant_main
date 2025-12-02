@@ -12,6 +12,10 @@
         - binary_sensor.guestbedroomwindow_opening
         - binary_sensor.officewindow_opening
       to: 'on'
+      from: 'off'
+  condition:
+    - condition: template
+      value_template: "{{ not is_state(trigger.entity_id, 'unavailable') and not is_state(trigger.entity_id, 'unknown') }}"
   action:
     - variables:
         room_name: >
@@ -31,18 +35,23 @@
         message: "Window Opened: {{ room_name }}"
         title: "Security Alert"
     # Alexa announcement
-    - service: notify.alexa_media
-      data:
-        target:
-          - media_player.graham_echo
-          - media_player.kitchen_echo_dot
-          - media_player.laurel_echo
-          - media_player.madelyn_echo
-        message: "Attention: The window in {{ room_name }} is open. Please check and close it if necessary."
+    - if:
+        - condition: template
+          value_template: "{{ not is_state('group.alexa_devices', 'unavailable') }}"
+      then:
+        - service: notify.alexa_media
+          data:
+            target:
+              - group.alexa_devices
+            message: "Attention: The window in {{ room_name }} is open. Please check and close it if necessary."
     # Update helper
-    - service: input_select.select_option
-      target:
-        entity_id: input_select.open_windows
-      data:
-        option: "{{ room_name }}"
+    - if:
+        - condition: template
+          value_template: "{{ not is_state('input_select.open_windows', 'unavailable') }}"
+      then:
+        - service: input_select.select_option
+          target:
+            entity_id: input_select.open_windows
+          data:
+            option: "{{ room_name }}"
   mode: single

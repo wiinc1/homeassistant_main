@@ -1,0 +1,364 @@
+#!/usr/bin/env python3
+"""
+Script to create GitHub issues for Home Assistant improvements
+"""
+
+import requests
+import json
+import os
+import sys
+
+# GitHub repository details
+REPO_OWNER = "wiinc1"
+REPO_NAME = "homeassistant_main"
+API_BASE = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}"
+
+def create_issue(title, body, labels=None):
+    """Create a GitHub issue"""
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+    }
+    
+    # Try to get token from environment or prompt user
+    token = os.getenv("GITHUB_TOKEN")
+    if not token:
+        print("GitHub token not found in environment.")
+        print("Please set GITHUB_TOKEN environment variable or enter your token:")
+        token = input("GitHub Personal Access Token: ").strip()
+        if not token:
+            print("No token provided. Exiting.")
+            return False
+    
+    headers["Authorization"] = f"token {token}"
+    
+    data = {
+        "title": title,
+        "body": body
+    }
+    
+    if labels:
+        data["labels"] = labels
+    
+    response = requests.post(f"{API_BASE}/issues", headers=headers, json=data)
+    
+    if response.status_code == 201:
+        issue_data = response.json()
+        print(f"✅ Created issue: {issue_data['title']} (#{issue_data['number']})")
+        print(f"   URL: {issue_data['html_url']}")
+        return True
+    else:
+        print(f"❌ Failed to create issue: {title}")
+        print(f"   Status: {response.status_code}")
+        print(f"   Response: {response.text}")
+        return False
+
+def main():
+    """Main function to create all issues"""
+    print("Creating GitHub issues for Home Assistant improvements...")
+    print("=" * 60)
+    
+    issues = [
+        {
+            "title": "Fix Wyze API Authentication Issues",
+            "body": """## Issue Description
+The Simple Wyze Vac integration is failing with a 400 Bad Request error during authentication.
+
+## Current Error
+```
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://auth-prod.api.wyze.com/api/user/login
+```
+
+## Impact
+- Vacuum automation functionality is broken
+- Integration setup fails on Home Assistant startup
+
+## Recommended Actions
+1. Check Wyze account credentials in the integration settings
+2. Verify 2FA settings if enabled
+3. Consider regenerating API keys
+4. Update the simple_wyze_vac custom integration to latest version
+
+## Priority
+**High** - This affects core automation functionality
+
+## Labels
+- `bug`
+- `integration`
+- `high-priority`
+
+## Steps to Reproduce
+1. Check Home Assistant logs
+2. Look for Wyze API authentication errors
+3. Verify integration configuration
+
+## Additional Notes
+This appears to be a credential/authentication issue rather than a code problem.""",
+            "labels": ["bug", "integration", "high-priority"]
+        },
+        {
+            "title": "Address Python Segmentation Faults",
+            "body": """## Issue Description
+Home Assistant is experiencing fatal Python segmentation faults, indicating memory corruption or compatibility issues.
+
+## Current Error
+```
+Fatal Python error: Segmentation fault
+Thread 0x0000709da4d1fb30 (most recent call first):
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 89 in _worker
+```
+
+## Impact
+- System crashes and instability
+- Potential data loss
+- Reduced reliability
+
+## Recommended Actions
+1. Update Python dependencies to latest compatible versions
+2. Check for memory leaks in custom integrations
+3. Consider updating Home Assistant to latest version
+4. Monitor system resources (CPU, memory usage)
+5. Review custom integration compatibility
+
+## Priority
+**High** - System stability issue
+
+## Labels
+- `bug`
+- `system`
+- `high-priority`
+- `stability`
+
+## Steps to Reproduce
+1. Monitor `home-assistant.log.fault` for crash reports
+2. Check system resource usage during crashes
+3. Review custom integration activity before crashes
+
+## Additional Notes
+Segmentation faults often indicate memory management issues or incompatible library versions.""",
+            "labels": ["bug", "system", "high-priority", "stability"]
+        },
+        {
+            "title": "Improve Device Tracker Configuration",
+            "body": """## Issue Description
+Device tracker configuration uses hardcoded IP addresses which can become unreliable when IP addresses change.
+
+## Current Configuration
+```yaml
+hosts:
+  brian_phone: 192.168.1.34 
+  graham_phone: 192.168.1.225
+  madelyn_phone: 192.168.1.155
+  kathryn_phone: 192.168.1.23
+```
+
+## Impact
+- Device tracking fails when IP addresses change
+- Manual configuration updates required
+- Reduced reliability of presence detection
+
+## Recommended Actions
+1. Set up DHCP reservations for family phones
+2. Consider using device names instead of IP addresses
+3. Implement fallback detection methods
+4. Add monitoring for device tracker failures
+
+## Priority
+**Medium** - Affects presence detection reliability
+
+## Labels
+- `enhancement`
+- `device-tracker`
+- `network`
+
+## Implementation Steps
+1. Configure router DHCP reservations
+2. Update device tracker configuration
+3. Test presence detection reliability
+4. Add monitoring and alerts
+
+## Additional Notes
+DHCP reservations provide more reliable device tracking than hardcoded IP addresses.""",
+            "labels": ["enhancement", "device-tracker", "network"]
+        },
+        {
+            "title": "Complete Package Organization Structure",
+            "body": """## Issue Description
+Many package directories are empty, suggesting incomplete organization of configuration files.
+
+## Current State
+```
+packages/
+├── core/          # Empty
+├── lighting/      # Empty  
+├── media/         # Empty
+├── security/      # Empty
+├── climate/       # Empty
+├── groups.yaml    # Empty
+├── sensors.yaml   # Empty
+├── lights.yaml    # Empty
+└── switches.yaml  # Empty
+```
+
+## Impact
+- Inconsistent configuration organization
+- Difficult to maintain and understand
+- Poor separation of concerns
+
+## Recommended Actions
+1. Move related configurations into appropriate package directories
+2. Create package files for each domain (lighting, security, etc.)
+3. Implement consistent naming conventions
+4. Add documentation for each package
+
+## Priority
+**Medium** - Improves maintainability
+
+## Labels
+- `enhancement`
+- `organization`
+- `documentation`
+
+## Implementation Steps
+1. Audit current configuration files
+2. Create package files for each domain
+3. Move configurations to appropriate packages
+4. Update main configuration.yaml references
+5. Add package documentation
+
+## Example Package Structure
+```yaml
+# packages/lighting/lights.yaml
+light:
+  - platform: mqtt
+    name: "Kitchen Light"
+    # ... configuration
+```""",
+            "labels": ["enhancement", "organization", "documentation"]
+        },
+        {
+            "title": "Add Error Handling to Automations",
+            "body": """## Issue Description
+Automations lack error handling for network failures, API errors, and other potential issues.
+
+## Current Issues
+- No fallback behavior when services fail
+- No retry logic for transient failures
+- No logging of automation failures
+- No user notification when automations fail
+
+## Impact
+- Silent failures reduce reliability
+- Difficult to troubleshoot issues
+- Poor user experience when automations don't work
+
+## Recommended Actions
+1. Add try-catch blocks for critical automations
+2. Implement retry logic for network-dependent actions
+3. Add failure notifications to users
+4. Create monitoring dashboard for automation health
+5. Add logging for automation failures
+
+## Priority
+**Medium** - Improves reliability and debugging
+
+## Labels
+- `enhancement`
+- `automation`
+- `reliability`
+- `monitoring`
+
+## Implementation Examples
+```yaml
+# Example with error handling
+action:
+  - service: notify.mobile_app
+    data:
+      message: "Automation started"
+  - try:
+      - service: light.turn_on
+        target:
+          entity_id: light.kitchen
+    except:
+      - service: notify.mobile_app
+        data:
+          message: "Failed to turn on kitchen light"
+```
+
+## Affected Automations
+- Water leak detection
+- Weather alerts
+- Vacuum scheduling
+- Window notifications""",
+            "labels": ["enhancement", "automation", "reliability", "monitoring"]
+        },
+        {
+            "title": "Implement Log Rotation",
+            "body": """## Issue Description
+Log files are growing without rotation, potentially consuming significant disk space.
+
+## Current Issues
+- `home-assistant.log` is 19KB and growing
+- `home-assistant.log.fault` is 22KB
+- No automatic log rotation configured
+- Potential disk space issues over time
+
+## Impact
+- Disk space consumption
+- Difficult to find recent log entries
+- Potential system performance impact
+
+## Recommended Actions
+1. Configure logrotate for Home Assistant logs
+2. Set up automatic log compression and cleanup
+3. Implement log level filtering
+4. Create log monitoring and alerts
+
+## Priority
+**Low** - Maintenance improvement
+
+## Labels
+- `enhancement`
+- `maintenance`
+- `logging`
+
+## Implementation Steps
+1. Create logrotate configuration
+2. Test log rotation functionality
+3. Monitor disk space usage
+4. Set up alerts for log size thresholds
+
+## Example logrotate config
+```
+/opt/homeassistant/*.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 644 homeassistant homeassistant
+}
+```""",
+            "labels": ["enhancement", "maintenance", "logging"]
+        }
+    ]
+    
+    success_count = 0
+    total_count = len(issues)
+    
+    for issue in issues:
+        print(f"\nCreating issue: {issue['title']}")
+        if create_issue(issue['title'], issue['body'], issue['labels']):
+            success_count += 1
+    
+    print("\n" + "=" * 60)
+    print(f"Summary: {success_count}/{total_count} issues created successfully")
+    if success_count > 0:
+        print(f"You can view them at: https://github.com/{REPO_OWNER}/{REPO_NAME}/issues")
+    
+    return success_count == total_count
+
+if __name__ == "__main__":
+    success = main()
+    sys.exit(0 if success else 1)

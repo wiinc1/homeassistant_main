@@ -36,7 +36,7 @@ lights_upstairs:
   name: Upstairs Lights
   entities:
     - light.upstairs_lights
-    - lights_garage_hallway
+    - group.lights_garage_hallway
 
 all_devices:
   name: All Devices

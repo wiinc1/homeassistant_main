@@ -1,11 +1,12 @@
 - id: 'water_leak_detection'
   alias: Water Leak Detection
-  description: 'Notify when water leak is detected'
+  description: 'Notify when water leak is detected with repeat announcements until resolved'
   trigger:
     # Initial trigger for leak detection
     - platform: state
       entity_id: group.water_leak_sensors
       to: 'on'
+      from: 'off'
     # Trigger every minute for repeat announcements
     - platform: time_pattern
       minutes: /1
@@ -14,13 +15,11 @@
     - condition: state
       entity_id: group.water_leak_sensors
       state: 'on'
+    - condition: template
+      value_template: "{{ not is_state('group.water_leak_sensors', 'unavailable') and not is_state('group.water_leak_sensors', 'unknown') }}"
   action:
-    # Mobile push notification
-    - service: notify.mobile_app_your_phone_name
-      data:
-        title: "⚠️ WATER LEAK ALERT! ⚠️"
-        message: >
-          Alert! Alert! Alert! Water leaking in 
+    - variables:
+        leak_location: >
           {% if is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture', 'on') %}
             Graham's Bathroom
           {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_2', 'on') %}
@@ -29,31 +28,33 @@
             Kitchen Sink
           {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_4', 'on') %}
             Laundry Room
-          {% endif %}!
+          {% endif %}
+    # Mobile push notification
+    - service: notify.mobile_app_your_phone_name
+      data:
+        title: "⚠️ WATER LEAK ALERT! ⚠️"
+        message: "Alert! Alert! Alert! Water leaking in {{ leak_location }}!"
         data:
           priority: high
           channel: alarm
 
-    # Initial double Alexa announcement
-    - repeat:
-        count: 2
-        sequence:
-          - service: notify.alexa_media
-            data:
-              target: group.alexa_devices
-              message: >
-                Alert! Alert! Alert! Water leaking in 
-                {% if is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture', 'on') %}
-                  Graham's Bathroom
-                {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_2', 'on') %}
-                  Kitchen Dishwasher
-                {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_3', 'on') %}
-                  Kitchen Sink
-                {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_4', 'on') %}
-                  Laundry Room
-                {% endif %}!
-              data:
-                type: announce
-                method: all
-          - delay: '00:00:03'  # 3 second delay between initial announcements
+    # Initial double Alexa announcement (only on first detection, not on time pattern)
+    - if:
+        - condition: template
+          value_template: "{{ trigger.platform != 'time_pattern' }}"
+      then:
+        - condition: template
+          value_template: >
+            {{ not is_state('group.alexa_devices', 'unavailable') }}
+        - repeat:
+            count: 2
+            sequence:
+              - service: notify.alexa_tts
+                data:
+                  target: group.alexa_devices
+                  message: "Alert! Alert! Alert! Water leaking in {{ leak_location }}!"
+                  data:
+                    type: announce
+                    method: all
+              - delay: '00:00:03'  # 3 second delay between initial announcements
   mode: restart

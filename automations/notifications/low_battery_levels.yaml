@@ -1,6 +1,6 @@
 - id: 'low_level_notifications'
   alias: Low Level Notifications
-  description: 'Monitors battery levels and other consumables'
+  description: 'Monitors battery levels and other consumables with cooldown to prevent spam'
   trigger:
     # Battery level triggers
     - platform: numeric_state
@@ -23,16 +23,23 @@
         - sensor.lumi_lumi_sensor_wleak_aq1_battery
         - sensor.lumi_lumi_sensor_wleak_aq1_battery_2
       below: 40
+      for:
+        minutes: 5
     # Printer level trigger
     - platform: numeric_state
       entity_id: sensor.printer_levels
       below: 40
-    # Water leak triggers
+      for:
+        minutes: 5
+    # Water leak triggers (no cooldown - critical)
     - platform: state
       entity_id:
         - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture
         - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_2
       to: 'on'
+  condition:
+    - condition: template
+      value_template: "{{ not is_state(trigger.entity_id, 'unavailable') and not is_state(trigger.entity_id, 'unknown') }}"
   action:
     - variables:
         notification_data: >-
@@ -114,11 +121,17 @@
         message: "{{ notification_data.message }}"
     # Alexa announcement for water leaks only
     - if:
-        condition: template
-        value_template: >
-          {{ trigger.entity_id.endswith('moisture') or trigger.entity_id.endswith('moisture_2') }}
+        - condition: template
+          value_template: >
+            {{ trigger.entity_id.endswith('moisture') or trigger.entity_id.endswith('moisture_2') }}
       then:
-        - service: notify.alexa_media
+        - condition: template
+          value_template: >
+            {{ not is_state('media_player.graham_echo', 'unavailable') or
+               not is_state('media_player.kitchen_echo_dot', 'unavailable') or
+               not is_state('media_player.laurel_echo', 'unavailable') or
+               not is_state('media_player.madelyn_echo', 'unavailable') }}
+        - service: notify.alexa_tts
           data:
             target:
               - media_player.graham_echo
@@ -126,4 +139,4 @@
               - media_player.laurel_echo
               - media_player.madelyn_echo
             message: "{{ notification_data.message }}"
-  mode: single
+  mode: queued

@@ -1,23 +1,40 @@
 - id: '1696023699743'
   alias: Lights - Madelyn & Laurel Vanity Off
-  description: Off after 15 minutes of being on
+  description: 'Turns off vanity lights after 15 minutes of being on'
   trigger:
     - platform: state
       entity_id:
         - switch.madelynvanitylight
         - switch.laurel_vanity
       to: 'on'
+      from: 'off'
       for:
         hours: 0
         minutes: 15
         seconds: 0
-  condition: []
+  condition:
+    - condition: template
+      value_template: >
+        {{ not is_state('switch.laurel_vanity', 'unavailable') and
+           not is_state('switch.madelynvanitylight', 'unavailable') and
+           not is_state('switch.madelynvanitydesk', 'unavailable') }}
   action:
-    - service: homeassistant.turn_off
-      data: {}
-      target:
-        entity_id:
-          - switch.laurel_vanity
-          - switch.madelynvanitylight
-          - switch.madelynvanitydesk
+    - if:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: switch.laurel_vanity
+              state: 'on'
+            - condition: state
+              entity_id: switch.madelynvanitylight
+              state: 'on'
+            - condition: state
+              entity_id: switch.madelynvanitydesk
+              state: 'on'
+      then:
+        - service: homeassistant.turn_off
+          entity_id:
+            - switch.laurel_vanity
+            - switch.madelynvanitylight
+            - switch.madelynvanitydesk
   mode: single

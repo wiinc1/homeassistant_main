@@ -5,11 +5,18 @@ homeassistant:
   longitude: !secret longitude
   elevation: !secret elevation
   unit_system: us_customary 
-  time_zone: America/New_York
+  time_zone: America/Chicago
   packages: !include_dir_named packages
 
 # Split configurations into separate files
-default_config:
+# default_config:
+# Essential components
+frontend:
+history:
+logbook:
+map:
+person:
+zone:
 automation: !include_dir_merge_list automations
 script: !include_dir_merge_named scripts
 scene: !include scenes.yaml
@@ -20,43 +27,29 @@ group: !include groups.yaml
 # zwave: !include integrations/zwave.yaml
 mqtt: !include integrations/mqtt.yaml
 
-# InfluxDB
-influxdb:
-  api_version: 2
-  host: 127.0.0.1 
-  port: 8086
-  ssl: false
-  organization: home_assistant
-  bucket: home_assistant
-  token: !secret influxdb_token
-
 # Recording configuration
 recorder:
-  # Explicitly control what gets recorded
-  include:
-    domains:
-      - sensor        # All sensors
-      - binary_sensor # All binary sensors
-      - climate      # All climate devices
-      - switch       # All switches
-    entities:
-      - sun.sun      # Specific entities you want
-      - weather.home # Specific weather data
-    
-  # Exclude entities you don't want to record
-  exclude:
-    entities:
-      - sensor.last_boot    # Example of excluding specific sensors
-      - sensor.date_time    # These update too frequently to be useful
-    domains:
-      - automation         # Don't record automation states
-      - script            # Don't record script states
-
+  db_url: sqlite:////config/home-assistant_v2.db
 # National Weather Service integration to stop alexa from announcing weather alerts
 input_boolean:
   weather_alert_active:
     name: Weather Alert Active
     initial: off
+  vacation_mode:
+    name: Vacation Mode
+    initial: off
+    icon: mdi:airplane
+
+# Cooldown tracking for notifications
+input_datetime:
+  security_notification_cooldown:
+    name: Security Notification Cooldown
+    has_date: false
+    has_time: true
+  battery_notification_cooldown:
+    name: Battery Notification Cooldown
+    has_date: false
+    has_time: true
 
 input_button: !include inputs/buttons.yaml
 

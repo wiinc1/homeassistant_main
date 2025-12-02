@@ -1,17 +1,24 @@
 - id: '1695908406405'
   alias: Light - Evening Lights Schedule
-  description: 'Turns on main floor lights at sunset and turns them off at 10:30 PM'
+  description: 'Turns on main floor lights one hour before sunset and turns them off at 10:30 PM'
   trigger:
     - platform: sun
+      id: sunset
       event: sunset
-      offset: '+00:00:00'
+      offset: '-01:00:00'
     - platform: time
       at: '22:30:00'
+  condition:
+    - condition: template
+      value_template: "{{ not is_state('light.lights_family_kitchen', 'unavailable') and not is_state('light.lights_family_kitchen', 'unknown') }}"
   action:
     - choose:
         - conditions:
             - condition: trigger
               id: sunset
+            - condition: state
+              entity_id: light.lights_family_kitchen
+              state: 'off'
           sequence:
             - service: light.turn_on
               target:
@@ -22,6 +29,9 @@
         - conditions:
             - condition: trigger
               id: '22:30:00'
+            - condition: state
+              entity_id: light.lights_family_kitchen
+              state: 'on'
           sequence:
             - service: light.turn_off
               target:

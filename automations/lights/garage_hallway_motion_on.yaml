@@ -8,17 +8,36 @@
         - binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
         - binary_sensor.lumi_lumi_motion_ac02_motion_2
       to: 'on'
-  condition: []
+      from: 'off'
+  condition:
+    - condition: template
+      value_template: >
+        {{ not is_state(trigger.entity_id, 'unavailable') and
+           not is_state('light.garage_hallway_2', 'unavailable') and
+           not is_state('light.garage_hallway', 'unavailable') and
+           not is_state('switch.laundryroom', 'unavailable') }}
   action:
     - choose:
-        # Night time behavior (11 PM to sunrise)
+        # 12AM-6AM: 35% brightness
         - conditions:
-            - condition: or
-              conditions:
-                - condition: time
-                  after: '23:00:00'
-                - condition: sun
-                  before: sunrise
+            - condition: time
+              after: '00:00:00'
+              before: '06:00:00'
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.garage_hallway_2
+                  - light.garage_hallway
+              data:
+                brightness_pct: 35
+            - service: switch.turn_on
+              target:
+                entity_id: switch.laundryroom
+        # 6AM-sunrise: 70% brightness
+        - conditions:
+            - condition: time
+              after: '06:00:00'
             - condition: sun
               before: sunrise
           sequence:
@@ -28,12 +47,27 @@
                   - light.garage_hallway_2
                   - light.garage_hallway
               data:
-                brightness_pct: 100
-                transition: 20
+                brightness_pct: 70
             - service: switch.turn_on
               target:
                 entity_id: switch.laundryroom
-        # Default daytime behavior
+        # 8PM-11:59PM: 70% brightness
+        - conditions:
+            - condition: time
+              after: '20:00:00'
+              before: '23:59:59'
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.garage_hallway_2
+                  - light.garage_hallway
+              data:
+                brightness_pct: 70
+            - service: switch.turn_on
+              target:
+                entity_id: switch.laundryroom
+        # Default daytime behavior (sunrise-8PM): 100% brightness
         - conditions: []
           sequence:
             - service: light.turn_on
@@ -47,3 +81,4 @@
               target:
                 entity_id: switch.laundryroom
   mode: single
+  max_exceeded: silent

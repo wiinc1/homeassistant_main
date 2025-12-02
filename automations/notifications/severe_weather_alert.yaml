@@ -1,6 +1,7 @@
-id: "nws_severe_weather_alert"
-alias: "Severe Weather Alert Announcement"
-trigger:
+- id: "nws_severe_weather_alert"
+  alias: "Severe Weather Alert Announcement"
+  description: 'Announces severe weather alerts via Alexa and allows stopping announcements'
+  trigger:
   # Trigger 1: Weather alert changes
   - platform: state
     entity_id: sensor.nws_alerts
@@ -8,63 +9,66 @@ trigger:
   # Trigger 2: Alexa stop command
   - platform: event
     event_type: "AMAZON.StopIntent"
-    platform: alexa
     id: "stop_command"
-condition:
-  # Only apply conditions to the weather alert trigger, not the stop command
-  - condition: or
-    conditions:
-      - condition: and
-        conditions:
-          - condition: trigger
-            id: "weather_alert"
-          - condition: template
-            value_template: >
-              {{ trigger.to_state.attributes.severity in ['Severe', 'Extreme'] }}
-      - condition: trigger
-        id: "stop_command"
-action:
-  - choose:
-      # If triggered by weather alert
-      - conditions:
-          - condition: trigger
-            id: "weather_alert"
-        sequence:
-          - service: input_boolean.turn_on
-            target:
-              entity_id: input_boolean.weather_alert_active
-          - repeat:
-              while:
-                - condition: state
-                  entity_id: input_boolean.weather_alert_active
-                  state: 'on'
-                - condition: template
-                  value_template: >
-                    {{ states('sensor.nws_alerts') != 'off' and 
-                       state_attr('sensor.nws_alerts', 'severity') in ['Severe', 'Extreme'] }}
-              sequence:
-                - service: notify.alexa_media
-                  data:
-                    target: group.alexa_devices
+  condition:
+    # Only apply conditions to the weather alert trigger, not the stop command
+    - condition: or
+      conditions:
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: "weather_alert"
+            - condition: template
+              value_template: >
+                {{ trigger.to_state.attributes.severity in ['Severe', 'Extreme'] }}
+        - condition: trigger
+          id: "stop_command"
+  action:
+    - choose:
+        # If triggered by weather alert
+        - conditions:
+            - condition: trigger
+              id: "weather_alert"
+          sequence:
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.weather_alert_active
+            - repeat:
+                while:
+                  - condition: state
+                    entity_id: input_boolean.weather_alert_active
+                    state: 'on'
+                  - condition: template
+                    value_template: >
+                      {{ states('sensor.nws_alerts') != 'off' and 
+                         state_attr('sensor.nws_alerts', 'severity') in ['Severe', 'Extreme'] }}
+                sequence:
+                  - condition: template
+                    value_template: "{{ not is_state('group.alexa_devices', 'unavailable') }}"
+                  - service: notify.alexa_tts
                     data:
-                      type: announce
-                    message: >
-                      {% set alert = trigger.to_state.attributes %}
-                      {% if alert.title is defined %}
-                        Alert! {{ alert.title }}. {{ alert.description }}
-                      {% else %}
-                        Weather Alert for {{ alert.area }}. {{ alert.description }}
-                      {% endif %}
-                - delay: '00:01:00'  # Wait 2 minutes between announcements
-    # If triggered by stop command
-    default:
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.weather_alert_active
-      - service: notify.alexa_media
-        data:
-          target: group.alexa_devices
+                      target: group.alexa_devices
+                      data:
+                        type: announce
+                      message: >
+                        {% set alert = trigger.to_state.attributes %}
+                        {% if alert.title is defined %}
+                          Alert! {{ alert.title }}. {{ alert.description }}
+                        {% else %}
+                          Weather Alert for {{ alert.area }}. {{ alert.description }}
+                        {% endif %}
+                  - delay: '00:01:00'  # Wait 1 minute between announcements
+      # If triggered by stop command  
+      default:
+        - service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.weather_alert_active
+        - condition: template
+          value_template: "{{ not is_state('group.alexa_devices', 'unavailable') }}"
+        - service: notify.alexa_tts
           data:
-            type: announce
-          message: "Weather alerts have been stopped"
-mode: restart
+            target: group.alexa_devices
+            data:
+              type: announce
+            message: "Weather alerts have been stopped"
+  mode: restart

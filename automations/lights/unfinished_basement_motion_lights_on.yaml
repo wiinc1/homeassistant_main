@@ -5,16 +5,19 @@
     - platform: state
       entity_id: switch.unfinished_basement_motion_detection
       to: 'on'
-      from:
-        - 'off'
-        - 'unavailable'
-        - 'unknown'
+      from: 'off'
   condition:
     - condition: sun
       after: sunset
     - condition: time
       after: '06:00:00' 
       before: '23:00:00'
+    - condition: template
+      value_template: >
+        {{ not is_state('switch.unfinished_basement_motion_detection', 'unavailable') and
+           not is_state('light.basement_familyroom_light', 'unavailable') and
+           not is_state('light.basementhallwaylight', 'unavailable') and
+           not is_state('light.stormshelter', 'unavailable') }}
   action:
     - service: light.turn_on
       target:
