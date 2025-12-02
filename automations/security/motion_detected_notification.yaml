@@ -1,6 +1,6 @@
 - id: 'security_notifications'
   alias: Security Notifications
-  description: 'Handles security-related notifications (motion, etc)'
+  description: 'Handles security-related notifications (motion, etc) with cooldown to prevent spam'
   trigger:
     - platform: state
       entity_id:
@@ -13,6 +13,12 @@
         - binary_sensor.west_side_motion
         - camera.west_side_high
       to: 'on'
+      from: 'off'
+  condition:
+    - condition: template
+      value_template: "{{ not is_state('input_boolean.vacation_mode', 'on') }}"
+    - condition: template
+      value_template: "{{ not is_state(trigger.entity_id, 'unavailable') and not is_state(trigger.entity_id, 'unknown') }}"
   action:
     - variables:
         location: >
@@ -37,12 +43,20 @@
         after: '23:00:00'
         before: '06:00:00'
       then:
-        - service: light.turn_on
-          target:
-            entity_id:
-              - light.lights_china_cabinet
-              - light.kitchen_spotlight
-        - service: vacuum.return_to_base
-          target:
-            entity_id: vacuum.first_floor_vacuum
-  mode: single
+        - if:
+            - condition: template
+              value_template: "{{ not is_state('light.lights_china_cabinet', 'unavailable') and not is_state('light.kitchen_spotlight', 'unavailable') }}"
+          then:
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.lights_china_cabinet
+                  - light.kitchen_spotlight
+        - if:
+            - condition: template
+              value_template: "{{ not is_state('vacuum.first_floor_vacuum', 'unavailable') }}"
+          then:
+            - service: vacuum.return_to_base
+              target:
+                entity_id: vacuum.first_floor_vacuum
+  mode: queued

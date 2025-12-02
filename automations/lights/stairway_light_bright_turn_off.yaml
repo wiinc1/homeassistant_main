@@ -1,0 +1,26 @@
+- id: 'stairway_light_bright_turn_off'
+  alias: Stairway Light Turn Off When Bright
+  description: 'Turns off stairway light when ambient light level is above 50 lux'
+  trigger:
+    - platform: numeric_state
+      entity_id:
+        - sensor.lumi_lumi_sensor_motion_aq2_illuminance_3
+      above: 50
+  condition:
+    - condition: state
+      entity_id: light.lightstairway
+      state: 'on'
+    - condition: sun
+      after: sunrise
+      before: sunset
+    - condition: template
+      value_template: >
+        {{ not is_state('sensor.lumi_lumi_sensor_motion_aq2_illuminance_3', 'unavailable') and
+           not is_state('light.lightstairway', 'unavailable') }}
+  action:
+    - service: light.turn_off
+      data:
+        transition: 5
+      target:
+        entity_id: light.lightstairway
+  mode: single

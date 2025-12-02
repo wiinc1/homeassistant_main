@@ -1,28 +1,208 @@
-condition:
-  - condition: or
-    conditions:
-      - condition: and
-        conditions:
-          - condition: time
-            after: "10:00:00"
-            before: "17:00:00"
-          - condition: state
-            entity_id: device_tracker.brian_phone
-            state: "home"
-          - condition: state
-            entity_id: device_tracker.graham_phone
-            state: "home"
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: device_tracker.kathryn_phone
-            state: "not_home"
-          - condition: state
-            entity_id: device_tracker.madelyn_phone
-            state: "not_home"
-          - condition: state
-            entity_id: device_tracker.graham_phone
-            state: "not_home"
-          - condition: state
-            entity_id: device_tracker.brian_phone
-            state: "not_home"
+- id: 'vacuum_smart_rotation'
+  alias: Vacuum - Smart Room Rotation
+  description: 'Automatically vacuums the room with the lowest clean count based on presence and time conditions'
+  trigger:
+    - platform: time_pattern
+      hours: /2
+      minutes: 0
+  condition:
+    - condition: or
+      conditions:
+        - condition: and
+          conditions:
+            - condition: time
+              after: "10:00:00"
+              before: "17:00:00"
+            - condition: state
+              entity_id: device_tracker.brian_phone
+              state: "home"
+            - condition: state
+              entity_id: device_tracker.graham_phone
+              state: "home"
+        - condition: and
+          conditions:
+            - condition: state
+              entity_id: device_tracker.kathryn_phone
+              state: "not_home"
+            - condition: state
+              entity_id: device_tracker.madelyn_phone
+              state: "not_home"
+            - condition: state
+              entity_id: device_tracker.graham_phone
+              state: "not_home"
+            - condition: state
+              entity_id: device_tracker.brian_phone
+              state: "not_home"
+    - condition: state
+      entity_id: vacuum.first_floor_vacuum
+      state: "docked"
+    - condition: template
+      value_template: "{{ not is_state('input_boolean.vacation_mode', 'on') }}"
+    - condition: template
+      value_template: "{{ not is_state('vacuum.first_floor_vacuum', 'unavailable') }}"
+  action:
+    - variables:
+        selected_room: >
+          {% set counters = {
+            'closet': states('counter.vacuum_closet_count') | int,
+            'laundry': states('counter.vacuum_laundry_count') | int,
+            'bedroom': states('counter.vacuum_bedroom_count') | int,
+            'familyroom': states('counter.vacuum_familyroom_count') | int,
+            'kitchen': states('counter.vacuum_kitchen_count') | int,
+            'entryway': states('counter.vacuum_entryway_count') | int,
+            'garageentry': states('counter.vacuum_garageentry_count') | int,
+            'kitchentable': states('counter.vacuum_kitchentable_count') | int,
+            'masterbedroom': states('counter.vacuum_masterbedroom_count') | int,
+            'masterbathroom': states('counter.vacuum_masterbathroom_count') | int,
+            'office': states('counter.vacuum_office_count') | int
+          } %}
+          {% set min_value = counters.values() | min %}
+          {% for room, count in counters.items() %}
+            {% if count == min_value %}
+              {{ room }}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'closet' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_closet
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_closet_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'laundry' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_laundry
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_laundry_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'bedroom' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_bedroom
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_bedroom_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'familyroom' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_familyroom_2
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_familyroom_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'kitchen' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_kitchen
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_kitchen_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'entryway' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_entryway
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_entryway_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'garageentry' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_garageentry
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_garageentry_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'kitchentable' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_kitchentable
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_kitchentable_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'masterbedroom' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_masterbedroom
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_masterbedroom_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'masterbathroom' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_masterbathroom
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_masterbathroom_count
+        - conditions:
+            - condition: template
+              value_template: "{{ selected_room == 'office' }}"
+          sequence:
+            - service: simple_wyze_vac.sweep_rooms
+              data:
+                entity_id: vacuum.first_floor_vacuum
+                rooms:
+                  - switch.swv_office
+            - service: counter.increment
+              target:
+                entity_id: counter.vacuum_office_count
+      default:
+        - service: simple_wyze_vac.sweep_rooms
+          data:
+            entity_id: vacuum.first_floor_vacuum
+            rooms:
+              - switch.swv_entryway
+        - service: counter.increment
+          target:
+            entity_id: counter.vacuum_entryway_count
+  mode: single

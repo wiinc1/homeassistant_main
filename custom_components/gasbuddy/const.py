@@ -15,9 +15,10 @@ CONF_NAME = "name"
 CONF_POSTAL = "zipcode"
 CONF_UOM = "uom"
 CONF_GPS = "gps"
+CONF_SOLVER = "solver"
 DEFAULT_INTERVAL = 3600
 DEFAULT_NAME = "Gas Station"
-CONFIG_VER = 5
+CONFIG_VER = 6
 
 # hass.data attribues
 ATTR_IMAGEURL = "image_url"
@@ -25,7 +26,7 @@ ATTR_LIMIT = "limit"
 ATTR_POSTAL_CODE = "zipcode"
 COORDINATOR = "coordinator"
 DOMAIN = "gasbuddy"
-VERSION = "1.1.2"
+VERSION = "1.1.4"
 ISSUE_URL = "https://github.com/firstof9/ha-gasbuddy/issues"
 PLATFORMS = ["sensor"]
 

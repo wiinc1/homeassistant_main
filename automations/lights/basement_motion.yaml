@@ -1,12 +1,12 @@
 - id: '1696381624866'
   alias: Lights - Basement Motion
-  description: ''
+  description: 'Turns on basement lights when motion is detected, turns off when occupancy clears'
   trigger:
     - platform: state
       entity_id:
         - binary_sensor.lumi_lumi_motion_ac02_motion
       to: 'on'
-      from:
+      from: 'off'
   condition:
     - condition: not
       conditions:
@@ -15,22 +15,24 @@
           domain: media_player
           entity_id: 66ccbb628ab2804eea6bd8c54e7449f5
           type: is_playing
+    - condition: template
+      value_template: "{{ not is_state('binary_sensor.lumi_lumi_motion_ac02_motion', 'unavailable') and not is_state('binary_sensor.lumi_lumi_motion_ac02_motion', 'unknown') }}"
   action:
-    - service: homeassistant.turn_on
-      data: {}
-      target:
-        entity_id:
-          - light.basement_familyroom_light
-          - light.basementhallwaylight
+    - if:
+        - condition: template
+          value_template: "{{ not is_state('light.basement_familyroom_light', 'unavailable') and not is_state('light.basementhallwaylight', 'unavailable') }}"
+      then:
+        - service: homeassistant.turn_on
+          entity_id:
+            - light.basement_familyroom_light
+            - light.basementhallwaylight
     - if:
         - condition: state
           entity_id: binary_sensor.lumi_lumi_motion_ac02_occupancy
           state: 'off'
       then:
         - service: homeassistant.turn_off
-          data: {}
-          target:
-            entity_id:
-              - light.basement_familyroom_light
-              - light.basementhallwaylight
+          entity_id:
+            - light.basement_familyroom_light
+            - light.basementhallwaylight
   mode: single

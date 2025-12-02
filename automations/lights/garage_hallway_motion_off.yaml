@@ -1,24 +1,41 @@
 - id: '1695860913281'  # new unique ID
   alias: Light - Garage Hallway Motion Turns Light Off
-  description: 'Turns off garage hallway and laundry room lights when no motion is detected for 10 minutes'
+  description: 'Turns off garage hallway and laundry room lights when no motion is detected for 5 minutes'
   trigger:
-    - platform: state
-      entity_id:
-        - binary_sensor.lumi_lumi_sensor_motion_aq2_motion
-        - binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
-        - binary_sensor.lumi_lumi_motion_ac02_motion_2
-      to: 'off'
-      for: '00:05:00'  # 10 minutes
-  condition: []
+    - platform: template
+      value_template: >
+        {{ states('binary_sensor.lumi_lumi_sensor_motion_aq2_motion') == 'off' and
+           states('binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2') == 'off' and
+           states('binary_sensor.lumi_lumi_motion_ac02_motion_2') == 'off' }}
+      for: '00:05:00'
+  condition:
+    - condition: template
+      value_template: >
+        {{ not is_state('light.garage_hallway_2', 'unavailable') and
+           not is_state('light.garage_hallway', 'unavailable') and
+           not is_state('switch.laundryroom', 'unavailable') }}
   action:
-    - service: light.turn_off
-      target:
-        entity_id:
-          - light.garage_hallway_2  
-          - light.garage_hallway    # This light was missing from the turn_off action
-      data:
-        transition: 1
-    - service: switch.turn_off
-      target:
-        entity_id: switch.laundryroom
+    - if:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: light.garage_hallway_2
+              state: 'on'
+            - condition: state
+              entity_id: light.garage_hallway
+              state: 'on'
+            - condition: state
+              entity_id: switch.laundryroom
+              state: 'on'
+      then:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.garage_hallway_2  
+              - light.garage_hallway
+          data:
+            transition: 1
+        - service: switch.turn_off
+          target:
+            entity_id: switch.laundryroom
   mode: single

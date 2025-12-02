@@ -1,10 +1,13 @@
-- alias: "Christmas Tree - Turn Off When Away"
+- id: 'christmas_tree_off_away'
+  alias: "Christmas Tree - Turn Off When Away"
+  description: 'Turns off Christmas tree lights when all family members are away'
   trigger:
     - platform: state
       entity_id: 
         - device_tracker.kathryn_phone
         - device_tracker.madelyn_phone
       to: 'not_home'
+      from: 'home'
   condition:
     - condition: state
       entity_id: device_tracker.kathryn_phone
@@ -12,9 +15,24 @@
     - condition: state
       entity_id: device_tracker.madelyn_phone
       state: 'not_home'
+    - condition: template
+      value_template: >
+        {{ not is_state('switch.upstairsfamilyroomchristmastree', 'unavailable') and
+           not is_state('switch.basementchristmastree', 'unavailable') }}
   action:
-    - service: switch.turn_off
-      target:
-        entity_id: 
-          - switch.upstairsfamilyroomchristmastree
-          - switch.basementchristmastree
+    - if:
+        condition: or
+        conditions:
+          - condition: state
+            entity_id: switch.upstairsfamilyroomchristmastree
+            state: 'on'
+          - condition: state
+            entity_id: switch.basementchristmastree
+            state: 'on'
+      then:
+        - service: switch.turn_off
+          target:
+            entity_id: 
+              - switch.upstairsfamilyroomchristmastree
+              - switch.basementchristmastree
+  mode: single

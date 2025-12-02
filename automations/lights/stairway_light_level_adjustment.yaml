@@ -1,6 +1,6 @@
 - id: '1698545646536'
   alias: Light Level - Stairway Light Turns On When Dark or Cloudy
-  description: 'Turns on stairway light at sunset or when cloudy, turns off 2 hours after sunrise'
+  description: 'Turns on stairway light at sunset or when cloudy'
   trigger:
     - platform: sun
       event: sunset
@@ -13,25 +13,25 @@
       to: 'cloudy'
       from: 'clear'
   condition:
-    - condition: and
+    - condition: state
+      entity_id: light.lightstairway
+      state: 'off'
+    - condition: or
       conditions:
-        - condition: state
-          entity_id: light.lightstairway
-          state: 'off'
-        - condition: or
+        - condition: sun
+          after: sunset
+          before: sunrise
+        - condition: and
           conditions:
-            - condition: sun
-              after: sunset
-              before: sunrise
             - condition: state
               entity_id: weather.home
               state: 'cloudy'
-            - condition: sun
-              after: sunrise
-              before: sunrise
-              after_offset: "0"
-              before_offset: "+02:00"
+            - condition: time
+              after: '06:00:00'
+              before: '23:00:00'
   action:
+    - condition: template
+      value_template: "{{ not is_state('light.lightstairway', 'unavailable') and not is_state('light.lightstairway', 'unknown') }}"
     - service: light.turn_on
       data:
         brightness_pct: 100

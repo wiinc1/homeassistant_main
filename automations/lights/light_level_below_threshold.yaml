@@ -13,42 +13,70 @@
       id: sunset
   
   condition:
-    # Optional: Add conditions like:
-    # - Only run if someone is home
+    # Only run if someone is home
     - condition: state
-      entity_id: group.family
+      entity_id: group.all_devices
       state: 'home'
-    # - Don't run if TV is on
+    # Don't run if TV is on
     - condition: not
       conditions:
         - condition: state
           entity_id: media_player.lg_webos_tv_un7300aud
           state: 'playing'
-  
+    # For low light trigger, only run between 9 AM and 4 PM
+    - condition: or
+      conditions:
+        - condition: trigger
+          id: sunset
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: low_light
+            - condition: time
+              after: '09:00:00'
+              before: '16:00:00'
+    - condition: template
+      value_template: >
+        {{ not is_state('group.all_devices', 'unavailable') and
+           not is_state('media_player.lg_webos_tv_un7300aud', 'unavailable') }}
   action:
     # Group all lights for easier management
-    - service: light.turn_on
-      target:
-        entity_id:
-          - light.kitchen_spotlight
-          - light.lights_china_cabinet
-          - light.lights_familyroom_mantle
-          - light.familyroomlamp
-          - light.masterlampbrian
-          - light.masterlampkathryn
-      data:
-        brightness_pct: >
-          {% if trigger.id == 'low_light' %}
-          {{ 100 - (states('sensor.lumi_lumi_sensor_motion_aq2_illuminance_3') | float) }}
-          {% else %}
-          100
-          {% endif %}
-        transition: 5  # Smooth transition over 5 seconds
+    - if:
+        - condition: template
+          value_template: >
+            {{ not is_state('light.kitchen_spotlight', 'unavailable') and
+               not is_state('light.lights_china_cabinet', 'unavailable') and
+               not is_state('light.lights_familyroom_mantle', 'unavailable') and
+               not is_state('light.familyroomlamp', 'unavailable') and
+               not is_state('light.masterlampbrian', 'unavailable') and
+               not is_state('light.masterlampkathryn', 'unavailable') }}
+      then:
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.kitchen_spotlight
+              - light.lights_china_cabinet
+              - light.lights_familyroom_mantle
+              - light.familyroomlamp
+              - light.masterlampbrian
+              - light.masterlampkathryn
+          data:
+            brightness_pct: >
+              {% if trigger.id == 'low_light' %}
+              {{ 100 - (states('sensor.lumi_lumi_sensor_motion_aq2_illuminance_3') | float) }}
+              {% else %}
+              100
+              {% endif %}
+            transition: 5  # Smooth transition over 5 seconds
     
     # Separate switches since they don't support brightness
-    - service: switch.turn_on
-      target:
-        entity_id: switch.christmas_tree_lights
+    - if:
+        - condition: template
+          value_template: "{{ not is_state('switch.christmas_tree_lights', 'unavailable') }}"
+      then:
+        - service: switch.turn_on
+          target:
+            entity_id: switch.christmas_tree_lights
   
   mode: single
   

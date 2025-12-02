@@ -1,7 +1,10 @@
+# Device Tracker Configuration
+# Uses iphonedetect custom integration for presence detection
 - platform: iphonedetect
-  consider_home: 60
-  scan_interval: 12
+  consider_home: 60  # Consider device home if not seen for 60 seconds
+  scan_interval: 12  # Scan every 12 seconds
   hosts:
+    # Family members' phones - consider using DHCP reservations for these IPs
     brian_phone: 192.168.1.34 
     graham_phone: 192.168.1.225
     madelyn_phone: 192.168.1.155

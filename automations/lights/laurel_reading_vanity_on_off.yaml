@@ -1,24 +1,32 @@
 - id: '1733889094747'
   alias: Laurel Vanity Off at Night
-  description: ''
-  triggers:
-    - trigger: time
+  description: 'Turns on Laurel vanity light at 9:30 PM and turns it off 50 minutes later'
+  trigger:
+    - platform: time
       at: '21:30:00'
-  conditions: []
-  actions:
-    - action: switch.turn_on
-      metadata: {}
-      data: {}
-      target:
-        entity_id: switch.laurel_vanity
-    - delay:
-        hours: 0
-        minutes: 50
-        seconds: 0
-        milliseconds: 0
-    - action: switch.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id: switch.laurel_vanity
+  condition:
+    - condition: template
+      value_template: "{{ not is_state('switch.laurel_vanity', 'unavailable') and not is_state('switch.laurel_vanity', 'unknown') }}"
+  action:
+    - if:
+        - condition: state
+          entity_id: switch.laurel_vanity
+          state: 'off'
+      then:
+        - service: switch.turn_on
+          data: {}
+          target:
+            entity_id: switch.laurel_vanity
+        - delay:
+            hours: 0
+            minutes: 50
+            seconds: 0
+        - if:
+            - condition: state
+              entity_id: switch.laurel_vanity
+              state: 'on'
+          then:
+            - service: switch.turn_off
+              target:
+                entity_id: switch.laurel_vanity
   mode: single

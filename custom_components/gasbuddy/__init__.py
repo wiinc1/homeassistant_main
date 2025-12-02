@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
@@ -20,6 +19,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .const import (
     CONF_GPS,
     CONF_INTERVAL,
+    CONF_SOLVER,
     CONF_STATION_ID,
     CONF_UOM,
     CONFIG_VER,
@@ -51,17 +51,19 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     )
 
     # Some sanity checks
-    updated_config = config_entry.data.copy()
-    if CONF_UOM not in config_entry.data.keys():
+    updated_config = config_entry.options.copy()
+    if CONF_UOM not in config_entry.options:
         updated_config[CONF_UOM] = True
-    if CONF_GPS not in config_entry.data.keys():
+    if CONF_GPS not in config_entry.options:
         updated_config[CONF_GPS] = True
+    if CONF_INTERVAL not in config_entry.options:
+        updated_config[CONF_INTERVAL] = 3600
 
-    if updated_config != config_entry.data:
-        hass.config_entries.async_update_entry(config_entry, data=updated_config)
+    if updated_config != config_entry.options:
+        hass.config_entries.async_update_entry(config_entry, options=updated_config)
 
     config_entry.add_update_listener(update_listener)
-    interval = config_entry.data.get(CONF_INTERVAL)
+    interval = config_entry.options.get(CONF_INTERVAL)
     coordinator = GasBuddyUpdateCoordinator(hass, interval, config_entry)
 
     # Fetch initial data so we have data when entities subscribe
@@ -83,17 +85,6 @@ async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry) -> Non
     """Update listener."""
     _LOGGER.debug("Attempting to reload entities from the %s integration", DOMAIN)
 
-    original_config = config_entry.data.copy()
-
-    original_config[CONF_INTERVAL] = config_entry.options[CONF_INTERVAL]
-    original_config[CONF_UOM] = config_entry.options[CONF_UOM]
-    original_config[CONF_GPS] = config_entry.options[CONF_GPS]
-
-    hass.config_entries.async_update_entry(
-        entry=config_entry,
-        data=original_config,
-    )
-
     await hass.config_entries.async_reload(config_entry.entry_id)
 
 
@@ -103,10 +94,10 @@ async def async_migrate_entry(hass, config_entry) -> bool:
     new_version = CONFIG_VER
     updated_config = config_entry.data.copy()
 
+    _LOGGER.debug("Migrating from version %s", version)
+
     # 1 -> 2: Migrate format
     if version == 1:
-        _LOGGER.debug("Migrating from version %s", version)
-
         # Add default unit of measure setting if missing
         if CONF_UOM not in updated_config.keys():
             updated_config[CONF_UOM] = True
@@ -114,6 +105,10 @@ async def async_migrate_entry(hass, config_entry) -> bool:
     if version < 5:
         if CONF_GPS not in updated_config.keys():
             updated_config[CONF_GPS] = True
+
+    if version < 6:
+        if CONF_SOLVER not in updated_config.keys():
+            updated_config[CONF_SOLVER] = None
 
     if updated_config != config_entry.data:
         hass.config_entries.async_update_entry(
@@ -129,18 +124,12 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     """Handle removal of an entry."""
     _LOGGER.debug("Attempting to unload entities from the %s integration", DOMAIN)
 
-    unload_ok = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(config_entry, platform)
-                for platform in PLATFORMS
-            ]
-        )
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        config_entry, PLATFORMS
     )
 
     if unload_ok:
         _LOGGER.debug("Successfully removed entities from the %s integration", DOMAIN)
-        hass.data[DOMAIN].pop(config_entry.entry_id)
 
     return unload_ok
 
@@ -163,7 +152,9 @@ class GasBuddyUpdateCoordinator(DataUpdateCoordinator):
         self.hass = hass
         self.interval = timedelta(seconds=interval)
         self._data = {}
-        self._api = GasBuddy(station_id=config.data[CONF_STATION_ID])
+        self._api = GasBuddy(
+            solver_url=config.data[CONF_SOLVER], station_id=config.data[CONF_STATION_ID]
+        )
 
         _LOGGER.debug("Data will be update every %s", self.interval)
 

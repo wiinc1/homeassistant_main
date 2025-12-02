@@ -4,6 +4,12 @@
   trigger:
     - platform: sun
       event: sunrise
+  condition:
+    - condition: state
+      entity_id: light.lights_family_kitchen
+      state: 'off'
+    - condition: template
+      value_template: "{{ not is_state('light.lights_family_kitchen', 'unavailable') and not is_state('light.lights_family_kitchen', 'unknown') }}"
   action:
     - service: light.turn_on
       target:

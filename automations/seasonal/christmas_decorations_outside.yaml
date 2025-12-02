@@ -1,34 +1,75 @@
 - id: '1701639971711'
   alias: 'Lights - Christmas: Outside Decorations On'
-  description: Sunset turn on lights
-  trigger:    # Single 'trigger' instead of 'triggers'
+  description: 'Turns on Christmas outdoor decorations at sunset'
+  trigger:
     - platform: sun
       event: sunset
-  condition: []   # Changed from 'conditions' to 'condition'
-  action:     # Single 'action' instead of 'actions'
-    - service: homeassistant.turn_on
-      target:
-        entity_id:
-          - switch.christmasoutdoorplug
-          - switch.christmasoutdoorplug2
-          - switch.christmasoutdoorplug3
-          - switch.christmasoutdoorplug4
+  condition:
+    - condition: template
+      value_template: >
+        {{ not is_state('switch.christmasoutdoorplug', 'unavailable') and
+           not is_state('switch.christmasoutdoorplug2', 'unavailable') and
+           not is_state('switch.christmasoutdoorplug3', 'unavailable') and
+           not is_state('switch.christmasoutdoorplug4', 'unavailable') }}
+  action:
+    - if:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: switch.christmasoutdoorplug
+              state: 'off'
+            - condition: state
+              entity_id: switch.christmasoutdoorplug2
+              state: 'off'
+            - condition: state
+              entity_id: switch.christmasoutdoorplug3
+              state: 'off'
+            - condition: state
+              entity_id: switch.christmasoutdoorplug4
+              state: 'off'
+      then:
+        - service: homeassistant.turn_on
+          entity_id:
+            - switch.christmasoutdoorplug
+            - switch.christmasoutdoorplug2
+            - switch.christmasoutdoorplug3
+            - switch.christmasoutdoorplug4
   mode: single
 
 - id: '1701640073494'
   alias: 'Lights - Christmas: Outside Decorations Off'
-  description: Sunset turn off lights
-  triggers:
-  - at: '23:00:00'
-    trigger: time
-  conditions: []
-  actions:
-  - data: {}
-    action: homeassistant.turn_off
-    target:
-      entity_id:
-      - switch.christmasoutdoorplug
-      - switch.christmasoutdoorplug2
-      - switch.christmasoutdoorplug3
-      - switch.christmasoutdoorplug4
+  description: 'Turns off Christmas outdoor decorations at 11:00 PM'
+  trigger:
+    - platform: time
+      at: '23:00:00'
+  condition:
+    - condition: template
+      value_template: >
+        {{ not is_state('switch.christmasoutdoorplug', 'unavailable') and
+           not is_state('switch.christmasoutdoorplug2', 'unavailable') and
+           not is_state('switch.christmasoutdoorplug3', 'unavailable') and
+           not is_state('switch.christmasoutdoorplug4', 'unavailable') }}
+  action:
+    - if:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: switch.christmasoutdoorplug
+              state: 'on'
+            - condition: state
+              entity_id: switch.christmasoutdoorplug2
+              state: 'on'
+            - condition: state
+              entity_id: switch.christmasoutdoorplug3
+              state: 'on'
+            - condition: state
+              entity_id: switch.christmasoutdoorplug4
+              state: 'on'
+      then:
+        - service: homeassistant.turn_off
+          entity_id:
+            - switch.christmasoutdoorplug
+            - switch.christmasoutdoorplug2
+            - switch.christmasoutdoorplug3
+            - switch.christmasoutdoorplug4
   mode: single

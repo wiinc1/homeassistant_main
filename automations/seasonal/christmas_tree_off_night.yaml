@@ -1,10 +1,28 @@
-alias: "Christmas Tree - Turn Off at Night"
-trigger:
-  - platform: time
-    at: '22:30:00'
-action:
-  - service: switch.turn_off
-    target:
-      entity_id: 
-        - switch.upstairsfamilyroomchristmastree
-        - switch.basementchristmastree
+- id: 'christmas_tree_off_night'
+  alias: "Christmas Tree - Turn Off at Night"
+  description: 'Turns off Christmas tree lights at 10:30 PM each night'
+  trigger:
+    - platform: time
+      at: '22:30:00'
+  condition:
+    - condition: template
+      value_template: >
+        {{ not is_state('switch.upstairsfamilyroomchristmastree', 'unavailable') and
+           not is_state('switch.basementchristmastree', 'unavailable') }}
+  action:
+    - if:
+        condition: or
+        conditions:
+          - condition: state
+            entity_id: switch.upstairsfamilyroomchristmastree
+            state: 'on'
+          - condition: state
+            entity_id: switch.basementchristmastree
+            state: 'on'
+      then:
+        - service: switch.turn_off
+          target:
+            entity_id: 
+              - switch.upstairsfamilyroomchristmastree
+              - switch.basementchristmastree
+  mode: single

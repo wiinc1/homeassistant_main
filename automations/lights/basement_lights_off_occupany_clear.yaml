@@ -1,18 +1,31 @@
 - id: '1696433765543'
   alias: Lights - Occupancy Clear in Basement Turn Off Lights
-  description: ''
+  description: 'Turns off basement lights when occupancy sensor clears (no motion detected)'
   trigger:
     - platform: state
       entity_id:
         - binary_sensor.lumi_lumi_motion_ac02_occupancy
-      from:
+      from: 'on'
       to: 'off'
-  condition: []
+  condition:
+    - condition: template
+      value_template: >
+        {{ not is_state('binary_sensor.lumi_lumi_motion_ac02_occupancy', 'unavailable') and
+           not is_state('light.basementhallwaylight', 'unavailable') and
+           not is_state('light.basement_familyroom_light', 'unavailable') }}
   action:
-    - service: homeassistant.turn_off
-      data: {}
-      target:
-        entity_id:
-          - light.basementhallwaylight
-          - light.basement_familyroom_light
+    - if:
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: light.basementhallwaylight
+              state: 'on'
+            - condition: state
+              entity_id: light.basement_familyroom_light
+              state: 'on'
+      then:
+        - service: homeassistant.turn_off
+          entity_id:
+            - light.basementhallwaylight
+            - light.basement_familyroom_light
   mode: single
