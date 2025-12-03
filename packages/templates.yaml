@@ -1,0 +1,93 @@
+# Template Sensors for Common Conditions
+# These template sensors provide reusable logic for presence detection
+# and entity availability checks
+
+template:
+  # Presence Sensors
+  - binary_sensor:
+      - name: "Everyone Home"
+        unique_id: everyone_home
+        state: >
+          {% if is_state('input_boolean.everyone_home_override', 'on') %}
+            {{ is_state('input_boolean.everyone_home_override', 'on') }}
+          {% else %}
+            {{ is_state('device_tracker.brian_phone', 'home') and
+               is_state('device_tracker.kathryn_phone', 'home') and
+               is_state('device_tracker.graham_phone', 'home') and
+               is_state('device_tracker.madelyn_phone', 'home') }}
+          {% endif %}
+        icon: >
+          {% if is_state('binary_sensor.everyone_home', 'on') %}
+            mdi:home-group
+          {% else %}
+            mdi:home-group-outline
+          {% endif %}
+        device_class: presence
+        attributes:
+          brian_home: "{{ is_state('device_tracker.brian_phone', 'home') }}"
+          kathryn_home: "{{ is_state('device_tracker.kathryn_phone', 'home') }}"
+          graham_home: "{{ is_state('device_tracker.graham_phone', 'home') }}"
+          madelyn_home: "{{ is_state('device_tracker.madelyn_phone', 'home') }}"
+      
+      - name: "Anyone Home"
+        unique_id: anyone_home
+        state: >
+          {% if is_state('input_boolean.anyone_home_override', 'on') %}
+            {{ is_state('input_boolean.anyone_home_override', 'on') }}
+          {% else %}
+            {{ is_state('device_tracker.brian_phone', 'home') or
+               is_state('device_tracker.kathryn_phone', 'home') or
+               is_state('device_tracker.graham_phone', 'home') or
+               is_state('device_tracker.madelyn_phone', 'home') }}
+          {% endif %}
+        icon: >
+          {% if is_state('binary_sensor.anyone_home', 'on') %}
+            mdi:home-account
+          {% else %}
+            mdi:home-account-outline
+          {% endif %}
+        device_class: presence
+        attributes:
+          brian_home: "{{ is_state('device_tracker.brian_phone', 'home') }}"
+          kathryn_home: "{{ is_state('device_tracker.kathryn_phone', 'home') }}"
+          graham_home: "{{ is_state('device_tracker.graham_phone', 'home') }}"
+          madelyn_home: "{{ is_state('device_tracker.madelyn_phone', 'home') }}"
+      
+      - name: "Family Presence Count"
+        unique_id: family_presence_count
+        state: >
+          {% set count = 0 %}
+          {% if is_state('device_tracker.brian_phone', 'home') %}
+            {% set count = count + 1 %}
+          {% endif %}
+          {% if is_state('device_tracker.kathryn_phone', 'home') %}
+            {% set count = count + 1 %}
+          {% endif %}
+          {% if is_state('device_tracker.graham_phone', 'home') %}
+            {% set count = count + 1 %}
+          {% endif %}
+          {% if is_state('device_tracker.madelyn_phone', 'home') %}
+            {% set count = count + 1 %}
+          {% endif %}
+          {{ count }}
+        icon: mdi:account-group
+        unit_of_measurement: "people"
+        attributes:
+          brian_home: "{{ is_state('device_tracker.brian_phone', 'home') }}"
+          kathryn_home: "{{ is_state('device_tracker.kathryn_phone', 'home') }}"
+          graham_home: "{{ is_state('device_tracker.graham_phone', 'home') }}"
+          madelyn_home: "{{ is_state('device_tracker.madelyn_phone', 'home') }}"
+  
+  # Vacation Mode Sensor (derived from existing input_boolean)
+  - binary_sensor:
+      - name: "Vacation Mode Active"
+        unique_id: vacation_mode_active
+        state: "{{ is_state('input_boolean.vacation_mode', 'on') }}"
+        icon: >
+          {% if is_state('input_boolean.vacation_mode', 'on') %}
+            mdi:airplane
+          {% else %}
+            mdi:airplane-off
+          {% endif %}
+        device_class: occupancy
+

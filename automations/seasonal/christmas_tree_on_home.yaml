@@ -9,13 +9,21 @@
       to: 'home'
       from: 'not_home'
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: time
       after: '07:00:00'
       before: '22:30:00'
     - condition: template
       value_template: >
         {{ not is_state('switch.upstairsfamilyroomchristmastree', 'unavailable') and
-           not is_state('switch.basementchristmastree', 'unavailable') }}
+           not is_state('switch.upstairsfamilyroomchristmastree', 'unknown') and
+           not is_state('switch.basementchristmastree', 'unavailable') and
+           not is_state('switch.basementchristmastree', 'unknown') }}
+    - condition: state
+      entity_id: binary_sensor.vacation_mode_active
+      state: 'off'
   action:
     - if:
         condition: or

@@ -11,6 +11,9 @@
     - platform: time_pattern
       minutes: /1
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     # Only run if leak is detected
     - condition: state
       entity_id: group.water_leak_sensors
@@ -45,7 +48,7 @@
       then:
         - condition: template
           value_template: >
-            {{ not is_state('group.alexa_devices', 'unavailable') }}
+            {{ not is_state('group.alexa_devices', 'unavailable') and not is_state('group.alexa_devices', 'unknown') }}
         - repeat:
             count: 2
             sequence:

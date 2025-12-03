@@ -1,0 +1,145 @@
+# Reusable Template Patterns for Automations
+# 
+# Home Assistant doesn't support Jinja2 macros directly, but we can use
+# template sensors and consistent patterns. This file documents common
+# template patterns that should be reused across automations.
+#
+# Usage: Copy the appropriate template pattern into your automation conditions
+
+# ============================================================================
+# ENTITY AVAILABILITY CHECKS
+# ============================================================================
+
+# Pattern: Check if a single entity is available
+# Usage in condition:
+#   - condition: template
+#       value_template: "{{ not is_state('ENTITY_ID', 'unavailable') and not is_state('ENTITY_ID', 'unknown') }}"
+#
+# Example:
+#   - condition: template
+#       value_template: "{{ not is_state('light.lights_family_kitchen', 'unavailable') and not is_state('light.lights_family_kitchen', 'unknown') }}"
+
+# Pattern: Check if multiple entities are available
+# Usage in condition:
+#   - condition: template
+#       value_template: >
+#         {{ not is_state('ENTITY_1', 'unavailable') and
+#            not is_state('ENTITY_1', 'unknown') and
+#            not is_state('ENTITY_2', 'unavailable') and
+#            not is_state('ENTITY_2', 'unknown') }}
+#
+# Example:
+#   - condition: template
+#       value_template: >
+#         {{ not is_state('light.garage_hallway_2', 'unavailable') and
+#            not is_state('light.garage_hallway', 'unavailable') and
+#            not is_state('switch.laundryroom', 'unavailable') }}
+
+# Pattern: Check if trigger entity is available
+# Usage in condition:
+#   - condition: template
+#       value_template: "{{ not is_state(trigger.entity_id, 'unavailable') and not is_state(trigger.entity_id, 'unknown') }}"
+
+# ============================================================================
+# PRESENCE CHECKS
+# ============================================================================
+
+# Pattern: Check if everyone is home (use template sensor)
+# Usage in condition:
+#   - condition: state
+#       entity_id: binary_sensor.everyone_home
+#       state: 'on'
+
+# Pattern: Check if anyone is home (use template sensor)
+# Usage in condition:
+#   - condition: state
+#       entity_id: binary_sensor.anyone_home
+#       state: 'on'
+
+# Pattern: Check if everyone is away
+# Usage in condition:
+#   - condition: state
+#       entity_id: binary_sensor.anyone_home
+#       state: 'off'
+
+# Pattern: Check specific family member is home (if needed)
+# Usage in condition:
+#   - condition: state
+#       entity_id: device_tracker.brian_phone
+#       state: 'home'
+
+# ============================================================================
+# VACATION MODE CHECKS
+# ============================================================================
+
+# Pattern: Check if vacation mode is NOT active (use template sensor)
+# Usage in condition:
+#   - condition: state
+#       entity_id: binary_sensor.vacation_mode_active
+#       state: 'off'
+#
+# Alternative (direct check):
+#   - condition: template
+#       value_template: "{{ not is_state('input_boolean.vacation_mode', 'on') }}"
+
+# ============================================================================
+# AUTOMATION ENABLED CHECKS
+# ============================================================================
+
+# Pattern: Check if automations are enabled
+# Usage in condition:
+#   - condition: state
+#       entity_id: input_boolean.automation_enabled
+#       state: 'on'
+
+# ============================================================================
+# TIME-BASED CONDITIONS
+# ============================================================================
+
+# Pattern: Check if within time range
+# Usage in condition:
+#   - condition: time
+#       after: '07:00:00'
+#       before: '22:30:00'
+
+# Pattern: Check if during daytime hours
+# Usage in condition:
+#   - condition: time
+#       after: sunrise
+#       before: sunset
+
+# ============================================================================
+# COMBINED PATTERNS
+# ============================================================================
+
+# Pattern: Standard automation condition structure
+# 1. Automation enabled check (if using master toggle)
+# 2. Entity availability checks
+# 3. Business logic conditions (presence, time, etc.)
+# 4. Vacation mode check (if applicable)
+#
+# Example structure:
+# condition:
+#   - condition: state
+#       entity_id: input_boolean.automation_enabled
+#       state: 'on'
+#   - condition: template
+#       value_template: "{{ not is_state('light.lights_family_kitchen', 'unavailable') and not is_state('light.lights_family_kitchen', 'unknown') }}"
+#   - condition: state
+#       entity_id: binary_sensor.everyone_home
+#       state: 'on'
+#   - condition: state
+#       entity_id: binary_sensor.vacation_mode_active
+#       state: 'off'
+
+# ============================================================================
+# NOTES
+# ============================================================================
+#
+# - Always check entity availability before using it in actions
+# - Use template sensors (binary_sensor.everyone_home, etc.) instead of
+#   repeating device_tracker checks
+# - Place availability checks early in condition lists
+# - Use consistent naming and structure across automations
+# - Document any complex template logic with comments
+

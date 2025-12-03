@@ -1,0 +1,126 @@
+# Standard Automation Template
+# This file serves as a documentation/example for standardized automation structure
+# DO NOT include this file in your automation configuration (it starts with underscore)
+#
+# Copy this template when creating new automations and follow the structure
+
+- id: 'unique_automation_id'
+  alias: "Automation - Descriptive Name"
+  description: 'Clear description of what this automation does'
+  
+  # TRIGGERS
+  # Define what causes this automation to run
+  trigger:
+    - platform: state  # or time, sun, numeric_state, etc.
+      entity_id: sensor.example
+      to: 'on'
+      from: 'off'
+  
+  # CONDITIONS
+  # Standard condition order:
+  # 1. Automation enabled check (if using master toggle)
+  # 2. Entity availability checks
+  # 3. Business logic conditions (presence, time, etc.)
+  # 4. Vacation mode check (if applicable)
+  condition:
+    # 1. Master automation toggle (optional but recommended)
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    
+    # 2. Entity availability checks (always check before using entities)
+    - condition: template
+      value_template: >
+        {{ not is_state('entity.id', 'unavailable') and
+           not is_state('entity.id', 'unknown') }}
+    
+    # 3. Business logic conditions
+    # Example: Presence check using template sensors
+    - condition: state
+      entity_id: binary_sensor.everyone_home
+      state: 'on'
+    
+    # Example: Time-based condition
+    - condition: time
+      after: '07:00:00'
+      before: '22:00:00'
+    
+    # 4. Vacation mode check (if automation should be disabled during vacation)
+    - condition: state
+      entity_id: binary_sensor.vacation_mode_active
+      state: 'off'
+  
+  # ACTIONS
+  # What the automation does when triggered and conditions are met
+  action:
+    # Use choose for conditional actions
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: sensor.example
+              state: 'on'
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: light.example
+              data:
+                brightness_pct: 100
+        - conditions: []  # Default case
+          sequence:
+            - service: light.turn_off
+              target:
+                entity_id: light.example
+    
+    # Or use simple actions
+    - service: notify.mobile_app_example
+      data:
+        title: "Notification Title"
+        message: "Notification message"
+  
+  # MODE
+  # single: Only one instance can run at a time (default)
+  # restart: Restart automation if triggered again while running
+  # queued: Queue multiple triggers
+  # parallel: Run multiple instances in parallel
+  mode: single
+  
+  # Optional: Maximum number of queued triggers
+  # max_exceeded: silent  # or log, error
+
+# ============================================================================
+# BEST PRACTICES
+# ============================================================================
+#
+# 1. NAMING CONVENTIONS:
+#    - Use descriptive aliases: "Category - Specific Action"
+#    - Use unique IDs: 'category_specific_action' or timestamp-based
+#
+# 2. CONDITIONS:
+#    - Always check entity availability before using it
+#    - Use template sensors (binary_sensor.everyone_home) instead of
+#      repeating device_tracker checks
+#    - Place availability checks early in condition lists
+#    - Use binary_sensor.vacation_mode_active instead of checking
+#      input_boolean.vacation_mode directly
+#
+# 3. TEMPLATES:
+#    - Always check both 'unavailable' and 'unknown' states
+#    - Use consistent formatting for multi-line templates
+#    - Document complex template logic with comments
+#
+# 4. ACTIONS:
+#    - Validate entity availability in action conditions if needed
+#    - Use choose blocks for conditional logic
+#    - Keep actions focused and single-purpose
+#
+# 5. MODE SELECTION:
+#    - Use 'single' for most automations (prevents overlapping runs)
+#    - Use 'restart' if you want to reset timing on re-trigger
+#    - Use 'queued' for notifications or non-conflicting actions
+#    - Use 'parallel' only when actions are truly independent
+#
+# 6. DOCUMENTATION:
+#    - Always include a clear description
+#    - Comment complex logic
+#    - Reference related automations if applicable
+

@@ -14,8 +14,13 @@
       from: 'clear'
   condition:
     - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    - condition: state
       entity_id: light.lightstairway
       state: 'off'
+    - condition: template
+      value_template: "{{ not is_state('light.lightstairway', 'unavailable') and not is_state('light.lightstairway', 'unknown') }}"
     - condition: or
       conditions:
         - condition: sun
@@ -30,8 +35,6 @@
               after: '06:00:00'
               before: '23:00:00'
   action:
-    - condition: template
-      value_template: "{{ not is_state('light.lightstairway', 'unavailable') and not is_state('light.lightstairway', 'unknown') }}"
     - service: light.turn_on
       data:
         brightness_pct: 100

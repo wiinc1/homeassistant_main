@@ -6,6 +6,9 @@
       event: sunrise
   condition:
     - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    - condition: state
       entity_id: light.lights_family_kitchen
       state: 'off'
     - condition: template

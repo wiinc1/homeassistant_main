@@ -38,6 +38,9 @@
         - binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_2
       to: 'on'
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: template
       value_template: "{{ not is_state(trigger.entity_id, 'unavailable') and not is_state(trigger.entity_id, 'unknown') }}"
   action:
@@ -127,10 +130,10 @@
       then:
         - condition: template
           value_template: >
-            {{ not is_state('media_player.graham_echo', 'unavailable') or
-               not is_state('media_player.kitchen_echo_dot', 'unavailable') or
-               not is_state('media_player.laurel_echo', 'unavailable') or
-               not is_state('media_player.madelyn_echo', 'unavailable') }}
+            {{ (not is_state('media_player.graham_echo', 'unavailable') and not is_state('media_player.graham_echo', 'unknown')) or
+               (not is_state('media_player.kitchen_echo_dot', 'unavailable') and not is_state('media_player.kitchen_echo_dot', 'unknown')) or
+               (not is_state('media_player.laurel_echo', 'unavailable') and not is_state('media_player.laurel_echo', 'unknown')) or
+               (not is_state('media_player.madelyn_echo', 'unavailable') and not is_state('media_player.madelyn_echo', 'unknown')) }}
         - service: notify.alexa_tts
           data:
             target:

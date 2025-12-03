@@ -9,6 +9,9 @@
     - platform: time
       at: '22:30:00'
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: template
       value_template: "{{ not is_state('light.lights_family_kitchen', 'unavailable') and not is_state('light.lights_family_kitchen', 'unknown') }}"
   action:

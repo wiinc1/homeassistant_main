@@ -9,11 +9,17 @@
            states('binary_sensor.lumi_lumi_motion_ac02_motion_2') == 'off' }}
       for: '00:05:00'
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: template
       value_template: >
         {{ not is_state('light.garage_hallway_2', 'unavailable') and
+           not is_state('light.garage_hallway_2', 'unknown') and
            not is_state('light.garage_hallway', 'unavailable') and
-           not is_state('switch.laundryroom', 'unavailable') }}
+           not is_state('light.garage_hallway', 'unknown') and
+           not is_state('switch.laundryroom', 'unavailable') and
+           not is_state('switch.laundryroom', 'unknown') }}
   action:
     - if:
         - condition: or
