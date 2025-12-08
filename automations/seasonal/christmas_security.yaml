@@ -10,9 +10,19 @@
       from: "off"
       to: "on"
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    - condition: template
+      value_template: >
+        {{ not is_state('binary_sensor.backyard_west_motion', 'unavailable') and
+           not is_state('binary_sensor.front_porch_motion', 'unavailable') }}
     - condition: time
       after: "22:00:00"
       before: "05:00:00"
+    - condition: state
+      entity_id: binary_sensor.vacation_mode_active
+      state: 'off'
   action:
     - service: switch.turn_on
       target:
@@ -29,3 +39,5 @@
           - switch.christmasoutdoorplug2
           - switch.christmasoutdoorplug3
           - switch.christmasoutdoorplug4
+  mode: single
+  max_exceeded: silent

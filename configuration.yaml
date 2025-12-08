@@ -28,8 +28,10 @@ group: !include groups.yaml
 mqtt: !include integrations/mqtt.yaml
 
 # Recording configuration
-recorder:
-  db_url: sqlite:////config/home-assistant_v2.db
+recorder: !include recorder.yaml
+
+# InfluxDB
+influxdb: !include integrations/influxdb.yaml
 # National Weather Service integration to stop alexa from announcing weather alerts
 input_boolean:
   weather_alert_active:

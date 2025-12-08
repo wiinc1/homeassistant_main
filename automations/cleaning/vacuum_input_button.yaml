@@ -1,8 +1,9 @@
 - id: 'vacuum_room_selection'
-  alias: "Vacuum Room Selection"
+  alias: "Cleaning - Vacuum Room Selection"
+  description: 'Triggers vacuum to clean a specific room when button is pressed'
   trigger:
     - platform: state
-      entity_id: 
+      entity_id:
         - input_button.vacuum_closet
         - input_button.vacuum_entryway
         - input_button.vacuum_familyroom
@@ -15,8 +16,17 @@
         - input_button.vacuum_masterbedroom
         - input_button.vacuum_office
       to: "pressed"
+  condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.vacation_mode_active
+      state: 'off'
   action:
     - service: script.vacuum_room_control
       data:
         trigger:
           entity_id: "{{ trigger.entity_id }}"
+  mode: single
+  max_exceeded: silent

@@ -1,11 +1,14 @@
 - id: '1695769395207'
-  alias: Stairway Light Off At Sunrise
+  alias: Lights - Stairway Off At Sunrise
   description: 'Turns off stairway light at sunrise'
   trigger:
     - platform: sun
       event: sunrise
       offset: 0
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: template
       value_template: "{{ not is_state('light.lightstairway', 'unavailable') and not is_state('light.lightstairway', 'unknown') }}"
   action:
@@ -18,3 +21,4 @@
           target:
             entity_id: light.lightstairway
   mode: single
+  max_exceeded: silent

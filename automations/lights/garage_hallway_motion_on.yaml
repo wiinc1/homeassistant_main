@@ -1,12 +1,17 @@
 - id: '1695860913280'
-  alias: Light - Garage Hallway Motion Turns Light On
+  alias: Lights - Garage Hallway Motion On
   description: 'Turns on garage hallway and laundry room lights when motion is detected'
   trigger:
     - platform: state
-      entity_id:
-        - binary_sensor.lumi_lumi_sensor_motion_aq2_motion
-        - binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
-        - binary_sensor.lumi_lumi_motion_ac02_motion_2
+      entity_id: binary_sensor.lumi_lumi_sensor_motion_aq2_motion
+      to: 'on'
+      from: 'off'
+    - platform: state
+      entity_id: binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
+      to: 'on'
+      from: 'off'
+    - platform: state
+      entity_id: binary_sensor.lumi_lumi_motion_ac02_motion_2
       to: 'on'
       from: 'off'
   condition:
@@ -15,12 +20,8 @@
       state: 'on'
     - condition: template
       value_template: >
-        {{ not is_state(trigger.entity_id, 'unavailable') and
-           not is_state(trigger.entity_id, 'unknown') and
-           not is_state('light.garage_hallway_2', 'unavailable') and
+        {{ not is_state('light.garage_hallway_2', 'unavailable') and
            not is_state('light.garage_hallway_2', 'unknown') and
-           not is_state('light.garage_hallway', 'unavailable') and
-           not is_state('light.garage_hallway', 'unknown') and
            not is_state('switch.laundryroom', 'unavailable') and
            not is_state('switch.laundryroom', 'unknown') }}
   action:
@@ -35,7 +36,6 @@
               target:
                 entity_id:
                   - light.garage_hallway_2
-                  - light.garage_hallway
               data:
                 brightness_pct: 35
             - service: switch.turn_on
@@ -52,7 +52,6 @@
               target:
                 entity_id:
                   - light.garage_hallway_2
-                  - light.garage_hallway
               data:
                 brightness_pct: 70
             - service: switch.turn_on
@@ -68,7 +67,6 @@
               target:
                 entity_id:
                   - light.garage_hallway_2
-                  - light.garage_hallway
               data:
                 brightness_pct: 70
             - service: switch.turn_on
@@ -81,7 +79,6 @@
               target:
                 entity_id:
                   - light.garage_hallway_2
-                  - light.garage_hallway
               data:
                 brightness_pct: 100
             - service: switch.turn_on

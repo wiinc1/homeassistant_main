@@ -1,0 +1,63 @@
+- id: 'madelyn_christmas_tree_weekday'
+  alias: Lights - Madelyn Christmas Tree Weekday Schedule
+  description: 'Turns Madelyn Christmas tree on/off on weekday schedule (Mon-Fri)'
+  trigger:
+    - platform: time
+      at: '05:00:00'
+      id: morning_on
+    - platform: time
+      at: '08:30:00'
+      id: morning_off
+    - platform: time
+      at: '15:30:00'
+      id: afternoon_on
+    - platform: time
+      at: '22:30:00'
+      id: evening_off
+  condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    - condition: time
+      weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+    - condition: template
+      value_template: >
+        {{ not is_state('switch.madelynvanitydesk', 'unavailable') and
+           not is_state('switch.madelynvanitydesk', 'unknown') }}
+  action:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: morning_on
+          sequence:
+            - service: switch.turn_on
+              target:
+                entity_id: switch.madelynvanitydesk
+        - conditions:
+            - condition: trigger
+              id: morning_off
+          sequence:
+            - service: switch.turn_off
+              target:
+                entity_id: switch.madelynvanitydesk
+        - conditions:
+            - condition: trigger
+              id: afternoon_on
+          sequence:
+            - service: switch.turn_on
+              target:
+                entity_id: switch.madelynvanitydesk
+        - conditions:
+            - condition: trigger
+              id: evening_off
+          sequence:
+            - service: switch.turn_off
+              target:
+                entity_id: switch.madelynvanitydesk
+  mode: single
+  max_exceeded: silent

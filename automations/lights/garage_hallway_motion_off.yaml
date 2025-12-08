@@ -1,5 +1,5 @@
 - id: '1695860913281'  # new unique ID
-  alias: Light - Garage Hallway Motion Turns Light Off
+  alias: Lights - Garage Hallway Motion Off
   description: 'Turns off garage hallway and laundry room lights when no motion is detected for 5 minutes'
   trigger:
     - platform: template
@@ -16,8 +16,6 @@
       value_template: >
         {{ not is_state('light.garage_hallway_2', 'unavailable') and
            not is_state('light.garage_hallway_2', 'unknown') and
-           not is_state('light.garage_hallway', 'unavailable') and
-           not is_state('light.garage_hallway', 'unknown') and
            not is_state('switch.laundryroom', 'unavailable') and
            not is_state('switch.laundryroom', 'unknown') }}
   action:
@@ -28,20 +26,17 @@
               entity_id: light.garage_hallway_2
               state: 'on'
             - condition: state
-              entity_id: light.garage_hallway
-              state: 'on'
-            - condition: state
               entity_id: switch.laundryroom
               state: 'on'
       then:
         - service: light.turn_off
           target:
             entity_id:
-              - light.garage_hallway_2  
-              - light.garage_hallway
+              - light.garage_hallway_2
           data:
             transition: 1
         - service: switch.turn_off
           target:
             entity_id: switch.laundryroom
   mode: single
+  max_exceeded: silent

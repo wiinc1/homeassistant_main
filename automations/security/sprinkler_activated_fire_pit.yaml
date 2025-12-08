@@ -7,13 +7,20 @@
       to: 'on'
       from: 'off'
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    - condition: template
+      value_template: >
+        {{ not is_state('switch.backyard_west_detections_motion', 'unavailable') and
+           not is_state('switch.backyard_outside_perimeter_fire_pit', 'unavailable') }}
     - condition: time
       after: '23:00:00'
       before: '05:00:00'
-    - condition: state 
+    - condition: state
       entity_id: switch.backyard_outside_perimeter_fire_pit
       state: 'off'
-      for: 
+      for:
         minutes: 5
   action:
     - service: rachio.start_multiple_zone_schedule
@@ -27,3 +34,4 @@
       target:
         entity_id: switch.backyard_outside_perimeter_fire_pit
   mode: single
+  max_exceeded: silent

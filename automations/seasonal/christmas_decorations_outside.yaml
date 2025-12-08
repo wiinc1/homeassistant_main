@@ -5,6 +5,9 @@
     - platform: sun
       event: sunset
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: template
       value_template: >
         {{ not is_state('switch.christmasoutdoorplug', 'unavailable') and
@@ -28,13 +31,15 @@
               entity_id: switch.christmasoutdoorplug4
               state: 'off'
       then:
-        - service: homeassistant.turn_on
-          entity_id:
-            - switch.christmasoutdoorplug
-            - switch.christmasoutdoorplug2
-            - switch.christmasoutdoorplug3
-            - switch.christmasoutdoorplug4
+        - service: switch.turn_on
+          target:
+            entity_id:
+              - switch.christmasoutdoorplug
+              - switch.christmasoutdoorplug2
+              - switch.christmasoutdoorplug3
+              - switch.christmasoutdoorplug4
   mode: single
+  max_exceeded: silent
 
 - id: '1701640073494'
   alias: 'Lights - Christmas: Outside Decorations Off'
@@ -43,6 +48,9 @@
     - platform: time
       at: '23:00:00'
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: template
       value_template: >
         {{ not is_state('switch.christmasoutdoorplug', 'unavailable') and
@@ -66,10 +74,12 @@
               entity_id: switch.christmasoutdoorplug4
               state: 'on'
       then:
-        - service: homeassistant.turn_off
-          entity_id:
-            - switch.christmasoutdoorplug
-            - switch.christmasoutdoorplug2
-            - switch.christmasoutdoorplug3
-            - switch.christmasoutdoorplug4
+        - service: switch.turn_off
+          target:
+            entity_id:
+              - switch.christmasoutdoorplug
+              - switch.christmasoutdoorplug2
+              - switch.christmasoutdoorplug3
+              - switch.christmasoutdoorplug4
   mode: single
+  max_exceeded: silent

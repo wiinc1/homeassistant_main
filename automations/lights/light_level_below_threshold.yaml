@@ -13,10 +13,20 @@
       id: sunset
   
   condition:
-    # Only run if someone is home
+    # 1. Master automation toggle
     - condition: state
-      entity_id: group.all_devices
-      state: 'home'
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    # 2. Entity availability checks
+    - condition: template
+      value_template: >
+        {{ not is_state('binary_sensor.anyone_home', 'unavailable') and
+           not is_state('binary_sensor.anyone_home', 'unknown') and
+           not is_state('media_player.lg_webos_tv_un7300aud', 'unavailable') }}
+    # 3. Only run if someone is home
+    - condition: state
+      entity_id: binary_sensor.anyone_home
+      state: 'on'
     # Don't run if TV is on
     - condition: not
       conditions:
@@ -35,10 +45,10 @@
             - condition: time
               after: '09:00:00'
               before: '16:00:00'
-    - condition: template
-      value_template: >
-        {{ not is_state('group.all_devices', 'unavailable') and
-           not is_state('media_player.lg_webos_tv_un7300aud', 'unavailable') }}
+    # 4. Vacation mode check
+    - condition: state
+      entity_id: binary_sensor.vacation_mode_active
+      state: 'off'
   action:
     # Group all lights for easier management
     - if:
@@ -79,7 +89,8 @@
             entity_id: switch.christmas_tree_lights
   
   mode: single
-  
+  max_exceeded: silent
+
   variables:
     LIGHT_THRESHOLD: 15
     MAX_BRIGHTNESS: 100

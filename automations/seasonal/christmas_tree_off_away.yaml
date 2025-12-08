@@ -34,7 +34,8 @@
       then:
         - service: switch.turn_off
           target:
-            entity_id: 
+            entity_id:
               - switch.upstairsfamilyroomchristmastree
               - switch.basementchristmastree
   mode: single
+  max_exceeded: silent
