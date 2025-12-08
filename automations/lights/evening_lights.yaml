@@ -1,5 +1,5 @@
 - id: '1695908406405'
-  alias: Light - Evening Lights Schedule
+  alias: Lights - Evening Schedule
   description: 'Turns on main floor lights one hour before sunset and turns them off at 10:30 PM'
   trigger:
     - platform: sun
@@ -14,6 +14,9 @@
       state: 'on'
     - condition: template
       value_template: "{{ not is_state('light.lights_family_kitchen', 'unavailable') and not is_state('light.lights_family_kitchen', 'unknown') }}"
+    - condition: state
+      entity_id: binary_sensor.vacation_mode_active
+      state: 'off'
   action:
     - choose:
         - conditions:
@@ -42,3 +45,4 @@
               data:
                 transition: 300
   mode: single
+  max_exceeded: silent

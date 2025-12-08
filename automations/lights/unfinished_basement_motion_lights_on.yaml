@@ -1,5 +1,5 @@
 - id: '1695861833625'
-  alias: 'Light - Basement Motion Activated'
+  alias: 'Lights - Basement Motion Activated'
   description: 'Turns on basement lights when motion is detected after sunset'
   trigger:
     - platform: state
@@ -46,3 +46,4 @@
       data:
         transition: 2
   mode: single
+  max_exceeded: silent

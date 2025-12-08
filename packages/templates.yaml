@@ -91,3 +91,55 @@ template:
           {% endif %}
         device_class: occupancy
 
+  # System Health Sensors
+  - sensor:
+      - name: "Low Battery Devices Count"
+        unique_id: low_battery_count
+        state: >
+          {{ states.sensor
+             | selectattr('attributes.device_class', 'defined')
+             | selectattr('attributes.device_class', 'eq', 'battery')
+             | rejectattr('state', 'in', ['unavailable', 'unknown'])
+             | selectattr('state', 'is_number')
+             | selectattr('state', 'lt', 40)
+             | list | count }}
+        icon: mdi:battery-alert
+        unit_of_measurement: "devices"
+        attributes:
+          low_battery_devices: >
+            {% set ns = namespace(devices=[]) %}
+            {% for sensor in states.sensor
+               | selectattr('attributes.device_class', 'defined')
+               | selectattr('attributes.device_class', 'eq', 'battery')
+               | rejectattr('state', 'in', ['unavailable', 'unknown'])
+               | selectattr('state', 'is_number')
+               | selectattr('state', 'lt', 40) %}
+              {% set ns.devices = ns.devices + [sensor.name ~ ': ' ~ sensor.state ~ '%'] %}
+            {% endfor %}
+            {{ ns.devices }}
+
+      - name: "Unavailable Entities Count"
+        unique_id: unavailable_entities_count
+        state: >
+          {{ states
+             | selectattr('state', 'eq', 'unavailable')
+             | list | count }}
+        icon: mdi:alert-circle
+        unit_of_measurement: "entities"
+        attributes:
+          unavailable_list: >
+            {% set ns = namespace(entities=[]) %}
+            {% for entity in states | selectattr('state', 'eq', 'unavailable') | list[:10] %}
+              {% set ns.entities = ns.entities + [entity.entity_id] %}
+            {% endfor %}
+            {{ ns.entities }}
+
+      - name: "Automations Disabled Count"
+        unique_id: automations_disabled_count
+        state: >
+          {{ states.automation
+             | selectattr('state', 'eq', 'off')
+             | list | count }}
+        icon: mdi:robot-off
+        unit_of_measurement: "automations"
+

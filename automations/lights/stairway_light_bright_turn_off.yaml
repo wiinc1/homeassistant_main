@@ -1,5 +1,5 @@
 - id: 'stairway_light_bright_turn_off'
-  alias: Stairway Light Turn Off When Bright
+  alias: Lights - Stairway Off When Bright
   description: 'Turns off stairway light when ambient light level is above 50 lux'
   trigger:
     - platform: numeric_state
@@ -7,6 +7,9 @@
         - sensor.lumi_lumi_sensor_motion_aq2_illuminance_3
       above: 50
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: state
       entity_id: light.lightstairway
       state: 'on'
@@ -24,3 +27,4 @@
       target:
         entity_id: light.lightstairway
   mode: single
+  max_exceeded: silent

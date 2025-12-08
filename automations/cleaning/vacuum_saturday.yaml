@@ -29,3 +29,4 @@
           - switch.swv_familyroom_2
           - switch.swv_entryway
   mode: single
+  max_exceeded: silent

@@ -1,0 +1,20 @@
+# Recorder Configuration
+# Exclude chatty/unnecessary entities to reduce database size
+
+db_url: sqlite:////config/home-assistant_v2.db
+purge_keep_days: 10
+commit_interval: 1
+
+exclude:
+  domains:
+    - automation
+    - updater
+  entity_globs:
+    - sensor.*_linkquality
+    - sensor.*_last_seen
+    - sensor.date*
+    - sensor.time*
+    - binary_sensor.*_update_available
+  entities:
+    - sun.sun
+    - sensor.nws_alerts

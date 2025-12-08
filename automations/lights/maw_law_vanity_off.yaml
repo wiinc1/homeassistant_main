@@ -13,6 +13,9 @@
         minutes: 15
         seconds: 0
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: template
       value_template: >
         {{ not is_state('switch.laurel_vanity', 'unavailable') and
@@ -32,9 +35,11 @@
               entity_id: switch.madelynvanitydesk
               state: 'on'
       then:
-        - service: homeassistant.turn_off
-          entity_id:
-            - switch.laurel_vanity
-            - switch.madelynvanitylight
-            - switch.madelynvanitydesk
+        - service: switch.turn_off
+          target:
+            entity_id:
+              - switch.laurel_vanity
+              - switch.madelynvanitylight
+              - switch.madelynvanitydesk
   mode: single
+  max_exceeded: silent

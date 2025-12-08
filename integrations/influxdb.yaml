@@ -1,0 +1,48 @@
+# InfluxDB v2 Configuration with Entity Filtering
+# Only store entities that benefit from long-term time-series data
+
+api_version: 2
+host: 127.0.0.1
+port: 8086
+ssl: false
+organization: home_assistant
+bucket: home_assistant
+token: !secret influxdb_token
+
+# Include only relevant entities for historical analysis
+include:
+  domains:
+    - sensor
+    - binary_sensor
+    - climate
+    - weather
+    - person
+  entity_globs:
+    - sensor.*_temperature
+    - sensor.*_humidity
+    - sensor.*_battery
+    - sensor.*_power
+    - sensor.*_energy
+    - sensor.*_illuminance
+  entities:
+    - vacuum.first_floor_vacuum
+
+# Exclude chatty/low-value entities
+exclude:
+  entity_globs:
+    - sensor.*_linkquality
+    - sensor.*_last_seen
+    - sensor.date*
+    - sensor.time*
+    - sensor.*_uptime
+    - binary_sensor.*_update_available
+  entities:
+    - sensor.nws_alerts
+    - sun.sun
+
+# Measurement configuration
+measurement_attr: entity_id
+default_measurement: state
+tags_attributes:
+  - friendly_name
+  - device_class

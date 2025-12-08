@@ -30,3 +30,4 @@
           - switch.swv_kitchen
           - switch.swv_kitchentable
   mode: single
+  max_exceeded: silent

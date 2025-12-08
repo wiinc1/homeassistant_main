@@ -1,5 +1,5 @@
 - id: 'morning_lights_automation'
-  alias: Light - Morning Kitchen Lights
+  alias: Lights - Morning Kitchen
   description: 'Turns on kitchen lights at sunrise and turns them off 4 hours later'
   trigger:
     - platform: sun
@@ -13,6 +13,9 @@
       state: 'off'
     - condition: template
       value_template: "{{ not is_state('light.lights_family_kitchen', 'unavailable') and not is_state('light.lights_family_kitchen', 'unknown') }}"
+    - condition: state
+      entity_id: binary_sensor.vacation_mode_active
+      state: 'off'
   action:
     - service: light.turn_on
       target:
@@ -23,3 +26,4 @@
       target:
         entity_id: light.lights_family_kitchen
   mode: single
+  max_exceeded: silent

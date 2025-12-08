@@ -14,6 +14,9 @@
       to: 'on'
       from: 'off'
   condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
     - condition: template
       value_template: "{{ not is_state(trigger.entity_id, 'unavailable') and not is_state(trigger.entity_id, 'unknown') }}"
   action:
@@ -55,3 +58,4 @@
           data:
             option: "{{ room_name }}"
   mode: single
+  max_exceeded: silent
