@@ -4,6 +4,25 @@ See [CHANGELOG_TEMPLATE.md](CHANGELOG_TEMPLATE.md) for entry format guidelines.
 
 ---
 
+## 2025-12-18 - Lights Off When Away (Issue #35)
+
+### Added
+- **Madelyn Lights Off When Away**
+  - Automatically turns off all Madelyn's room lights when she leaves home
+  - Triggers after 5 minutes of `not_home` state (prevents GPS glitch false triggers)
+  - Entities: `light.madelynlamp`, `light.madelynroomlights`, `switch.madelynroomswitch`, `switch.madelynvanitylight`
+  - Tracker: `device_tracker.madelyn_phone`
+  - File: `automations/lights/madelyn_lights_off_away.yaml`
+
+- **Laurel Lights Off When Away**
+  - Automatically turns off all Laurel's room lights when she leaves home
+  - Triggers after 5 minutes of `not_home` state (prevents GPS glitch false triggers)
+  - Entities: `light.laurellamp`, `light.laurelroomlights`, `switch.laurelroomswitch`, `switch.christmastreelaurel`, `switch.laurel_vanity`
+  - Tracker: `device_tracker.laurel_watch`
+  - File: `automations/lights/laurel_lights_off_away.yaml`
+
+---
+
 ## 2025-12-18 - Presence-Based Christmas Tree Automations
 
 ### Changed - Madelyn & Laurel Christmas Tree Triggers
