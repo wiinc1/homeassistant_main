@@ -1,13 +1,13 @@
-- id: 'madelyn_christmas_tree_weekday'
-  alias: Lights - Madelyn Christmas Tree Presence & Evening Off (Weekday)
-  description: 'Turns Madelyn Christmas tree on when she arrives home (8AM-9PM) and off at 10:30PM on weekdays'
+- id: 'laurel_christmas_tree_weekday'
+  alias: Lights - Laurel Christmas Tree Presence & Evening Off (Weekday)
+  description: 'Turns Laurel Christmas tree on when she arrives home (8AM-9PM) and off at 9PM on weekdays'
   trigger:
     - platform: state
-      entity_id: device_tracker.madelyn_phone
+      entity_id: device_tracker.laurel_watch
       to: 'home'
       id: presence_on
     - platform: time
-      at: '22:30:00'
+      at: '21:00:00'
       id: evening_off
   condition:
     - condition: state
@@ -15,8 +15,8 @@
       state: 'on'
     - condition: template
       value_template: >
-        {{ not is_state('switch.madelynvanitydesk', 'unavailable') and
-           not is_state('switch.madelynvanitydesk', 'unknown') }}
+        {{ not is_state('switch.basementchristmastree', 'unavailable') and
+           not is_state('switch.basementchristmastree', 'unknown') }}
   action:
     - choose:
         - conditions:
@@ -33,32 +33,41 @@
                 - thu
                 - fri
             - condition: state
-              entity_id: switch.madelynvanitydesk
+              entity_id: switch.basementchristmastree
               state: 'off'
           sequence:
             - service: switch.turn_on
               target:
-                entity_id: switch.madelynvanitydesk
+                entity_id: switch.basementchristmastree
             - delay:
                 seconds: 10
             - if:
                 - condition: state
-                  entity_id: switch.madelynvanitydesk
+                  entity_id: switch.basementchristmastree
                   state: 'off'
               then:
                 - service: switch.turn_on
                   target:
-                    entity_id: switch.madelynvanitydesk
+                    entity_id: switch.basementchristmastree
                 - delay:
                     seconds: 10
                 - if:
                     - condition: state
-                      entity_id: switch.madelynvanitydesk
+                      entity_id: switch.basementchristmastree
                       state: 'off'
                   then:
                     - service: switch.turn_on
                       target:
-                        entity_id: switch.madelynvanitydesk
+                        entity_id: switch.basementchristmastree
+            - service: notify.discord_ha
+              data:
+                message: >
+                  🎄 **Laurel Christmas Tree - Arrived Home**
+
+                  **Action:** Turned ON
+                  **Trigger:** Laurel arrived home
+                  **State:** {{ states('switch.basementchristmastree') }}
+                  **Time:** {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
         - conditions:
             - condition: trigger
               id: evening_off
@@ -70,31 +79,40 @@
                 - thu
                 - fri
             - condition: state
-              entity_id: switch.madelynvanitydesk
+              entity_id: switch.basementchristmastree
               state: 'on'
           sequence:
             - service: switch.turn_off
               target:
-                entity_id: switch.madelynvanitydesk
+                entity_id: switch.basementchristmastree
             - delay:
                 seconds: 10
             - if:
                 - condition: state
-                  entity_id: switch.madelynvanitydesk
+                  entity_id: switch.basementchristmastree
                   state: 'on'
               then:
                 - service: switch.turn_off
                   target:
-                    entity_id: switch.madelynvanitydesk
+                    entity_id: switch.basementchristmastree
                 - delay:
                     seconds: 10
                 - if:
                     - condition: state
-                      entity_id: switch.madelynvanitydesk
+                      entity_id: switch.basementchristmastree
                       state: 'on'
                   then:
                     - service: switch.turn_off
                       target:
-                        entity_id: switch.madelynvanitydesk
+                        entity_id: switch.basementchristmastree
+            - service: notify.discord_ha
+              data:
+                message: >
+                  🎄 **Laurel Christmas Tree - Evening Off**
+
+                  **Action:** Turned OFF
+                  **Schedule:** Weekday 9:00 PM
+                  **State:** {{ states('switch.basementchristmastree') }}
+                  **Time:** {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
   mode: single
   max_exceeded: silent
