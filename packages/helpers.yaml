@@ -19,7 +19,6 @@ input_boolean:
     name: Automation Enabled
     icon: mdi:robot
     initial: on
-    description: "Master toggle to enable/disable all automations"
 
 # Timers for motion-based lighting
 timer:
