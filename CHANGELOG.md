@@ -4,6 +4,29 @@ See [CHANGELOG_TEMPLATE.md](CHANGELOG_TEMPLATE.md) for entry format guidelines.
 
 ---
 
+## 2026-07-08 - Garage Hallway Timer Redesign (Issue #40)
+
+### Changed - Garage Hallway Motion Lighting
+
+**WHY (Motivation):**
+- Multi-sensor "all off for 5 minutes" off logic could leave lights stuck on if any motion sensor was unavailable or stuck
+- Only `light.garage_hallway_2` was controlled; `light.garage_hallway` was in the group but ignored
+- Four nearly identical brightness branches were hard to maintain
+- Motion always forced lights on with no daylight (illuminance) skip
+
+**WHAT (Solution):**
+- Added `timer.garage_hallway_lights` (5 minutes, restore) in `packages/helpers.yaml`
+- Motion on: turn on both hallway lights + laundry, start/restart timer; skip entirely when max lux ≥ 50
+- Timer finished: turn off both lights + laundry
+- Single brightness template preserves prior schedule (35% overnight, 70% pre-sunrise and after 20:00, 100% daytime)
+
+**IMPACT:**
+- Entities: `light.garage_hallway`, `light.garage_hallway_2`, `switch.laundryroom`, `timer.garage_hallway_lights`
+- Motion sensors unchanged; lux uses max of the three paired illuminance sensors
+- Files: `automations/lights/garage_hallway_motion_on.yaml`, `garage_hallway_motion_off.yaml`, `packages/helpers.yaml`
+
+---
+
 ## 2025-12-18 - Presence-Based Christmas Tree Automations
 
 ### Changed - Madelyn & Laurel Christmas Tree Triggers

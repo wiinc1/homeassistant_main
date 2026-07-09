@@ -1,88 +1,56 @@
 - id: '1695860913280'
   alias: Lights - Garage Hallway Motion On
-  description: 'Turns on garage hallway and laundry room lights when motion is detected'
+  description: >-
+    Turns on garage hallway and laundry lights on motion when ambient light is
+    low, and (re)starts a 5-minute timer. Brightness follows time of day.
   trigger:
     - platform: state
-      entity_id: binary_sensor.lumi_lumi_sensor_motion_aq2_motion
-      to: 'on'
-      from: 'off'
-    - platform: state
-      entity_id: binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
-      to: 'on'
-      from: 'off'
-    - platform: state
-      entity_id: binary_sensor.lumi_lumi_motion_ac02_motion_2
+      entity_id:
+        - binary_sensor.lumi_lumi_sensor_motion_aq2_motion
+        - binary_sensor.lumi_lumi_sensor_motion_aq2_motion_2
+        - binary_sensor.lumi_lumi_motion_ac02_motion_2
       to: 'on'
       from: 'off'
   condition:
     - condition: state
       entity_id: input_boolean.automation_enabled
       state: 'on'
+    # Skip when already bright enough (max lux across the three motion sensors).
+    # Unavailable/unknown lux reads as 0 so they do not block turn-on.
     - condition: template
       value_template: >
-        {{ not is_state('light.garage_hallway_2', 'unavailable') and
-           not is_state('light.garage_hallway_2', 'unknown') and
-           not is_state('switch.laundryroom', 'unavailable') and
-           not is_state('switch.laundryroom', 'unknown') }}
+        {% set lux = [
+          states('sensor.lumi_lumi_sensor_motion_aq2_illuminance') | float(0),
+          states('sensor.lumi_lumi_sensor_motion_aq2_illuminance_2') | float(0),
+          states('sensor.lumi_lumi_motion_ac02_illuminance_2') | float(0)
+        ] %}
+        {{ lux | max < 50 }}
   action:
-    - choose:
-        # 12AM-6AM: 35% brightness
-        - conditions:
-            - condition: time
-              after: '00:00:00'
-              before: '06:00:00'
-          sequence:
-            - service: light.turn_on
-              target:
-                entity_id:
-                  - light.garage_hallway_2
-              data:
-                brightness_pct: 35
-            - service: switch.turn_on
-              target:
-                entity_id: switch.laundryroom
-        # 6AM-sunrise: 70% brightness
-        - conditions:
-            - condition: time
-              after: '06:00:00'
-            - condition: sun
-              before: sunrise
-          sequence:
-            - service: light.turn_on
-              target:
-                entity_id:
-                  - light.garage_hallway_2
-              data:
-                brightness_pct: 70
-            - service: switch.turn_on
-              target:
-                entity_id: switch.laundryroom
-        # 8PM-11:59PM: 70% brightness
-        - conditions:
-            - condition: time
-              after: '20:00:00'
-              before: '23:59:59'
-          sequence:
-            - service: light.turn_on
-              target:
-                entity_id:
-                  - light.garage_hallway_2
-              data:
-                brightness_pct: 70
-            - service: switch.turn_on
-              target:
-                entity_id: switch.laundryroom
-        # Default daytime behavior (sunrise-8PM): 100% brightness
-        - conditions: []
-          sequence:
-            - service: light.turn_on
-              target:
-                entity_id:
-                  - light.garage_hallway_2
-              data:
-                brightness_pct: 100
-            - service: switch.turn_on
-              target:
-                entity_id: switch.laundryroom
+    - variables:
+        # Preserve prior schedule: 35% overnight, 70% pre-sunrise morning and
+        # after 8PM, 100% daytime (including post-sunset until 20:00).
+        brightness_pct: >
+          {% if now().hour < 6 %}
+            35
+          {% elif now().hour >= 20 %}
+            70
+          {% elif now().hour < 12 and is_state('sun.sun', 'below_horizon') %}
+            70
+          {% else %}
+            100
+          {% endif %}
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.garage_hallway
+          - light.garage_hallway_2
+      data:
+        brightness_pct: "{{ brightness_pct | int }}"
+    - service: switch.turn_on
+      target:
+        entity_id: switch.laundryroom
+    - service: timer.start
+      target:
+        entity_id: timer.garage_hallway_lights
   mode: single
   max_exceeded: silent

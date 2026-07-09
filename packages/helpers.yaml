@@ -8,12 +8,12 @@ input_boolean:
     name: Everyone Home Override
     icon: mdi:home-group
     initial: off
-  
+
   anyone_home_override:
     name: Anyone Home Override
     icon: mdi:home-account
     initial: off
-  
+
   # Master automation control
   automation_enabled:
     name: Automation Enabled
@@ -21,3 +21,10 @@ input_boolean:
     initial: on
     description: "Master toggle to enable/disable all automations"
 
+# Timers for motion-based lighting
+timer:
+  garage_hallway_lights:
+    name: Garage Hallway Lights
+    duration: "00:05:00"
+    icon: mdi:timer-outline
+    restore: true
