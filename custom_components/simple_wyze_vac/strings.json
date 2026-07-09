@@ -4,20 +4,33 @@
       "step": {
         "user": {
           "title": "Wyze credentials",
+          "description": "Create a Key ID and API Key at the Wyze developer console. Paste carefully (no leading/trailing spaces).",
           "data": {
             "username": "Username",
             "password": "Password",
             "key_id": "Wyze API Key ID",
             "api_key": "Wyze API Auth Key",
-            "totp": "Base32 Key (NOT THE 6 DIGITS from your Authenticator) If you dont know what this is, please leave it blank."
+            "totp": "Base32 TOTP secret (not the 6-digit code). Leave blank if unused."
+          }
+        },
+        "reauth_confirm": {
+          "title": "Re-authenticate Simple Wyze Vac",
+          "description": "Wyze rejected the stored credentials. Update password and regenerate API Key ID / API Key if needed.",
+          "data": {
+            "username": "Username",
+            "password": "Password",
+            "key_id": "Wyze API Key ID",
+            "api_key": "Wyze API Auth Key",
+            "totp": "Base32 TOTP secret (optional)"
           }
         }
       },
       "error": {
-        "auth_error": "Problems logging in. Please verify your username and password."
+        "auth_error": "Login failed. Check username/password, Key ID, API Key, and TOTP. Regenerate API keys at the Wyze developer console if needed."
       },
       "abort": {
-        "already_configured": "Simple Wyze Vac already configured."
+        "already_configured": "Simple Wyze Vac already configured.",
+        "reauth_successful": "Re-authentication successful."
       }
     },
     "options": {
