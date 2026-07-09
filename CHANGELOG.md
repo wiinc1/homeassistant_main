@@ -4,6 +4,30 @@ See [CHANGELOG_TEMPLATE.md](CHANGELOG_TEMPLATE.md) for entry format guidelines.
 
 ---
 
+## 2026-07-08 - Simple Wyze Vac Auth / SSL Fix (Issue #20)
+
+### Fixed - simple_wyze_vac authentication and TLS
+
+**WHY (Motivation):**
+- Integration failed setup with HTTP 400 / SSL errors; vacuum entities unavailable
+- Stored Key ID and API Key had leading whitespace from paste
+- `api.wyzecam.com` presents an incomplete TLS chain (missing DigiCert intermediate); system CA alone failed verification
+- Email/API-key login can still return invalid credentials; tokens from `wyzeapi` may still work for the same account
+
+**WHAT (Solution):**
+- Ship DigiCert TLS RSA SHA256 2020 CA1 intermediate and build a combined CA bundle for wyze_sdk
+- Strip credentials on load and in config flow; migrate entry data when whitespace present
+- Fall back to `wyzeapi` access/refresh tokens for the same username when password login fails
+- Raise `ConfigEntryAuthFailed` with clear reauth guidance; add reauth config step
+- Bump integration version to 1.9.5
+
+**IMPACT:**
+- Files under `custom_components/simple_wyze_vac/`
+- Restores vacuum discovery when SSL/token path succeeds
+- User may still need to regenerate Wyze API keys if email login remains invalid
+
+---
+
 ## 2026-07-08 - Water Leak Detection Fixes (Issue #46)
 
 ### Fixed - Water Leak Detection Notify
