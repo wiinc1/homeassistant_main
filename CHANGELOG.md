@@ -4,6 +4,26 @@ See [CHANGELOG_TEMPLATE.md](CHANGELOG_TEMPLATE.md) for entry format guidelines.
 
 ---
 
+## 2026-07-08 - Vanity Auto-Off Isolation (Issue #44)
+
+### Fixed - Madelyn & Laurel Vanity Off Coupling
+
+**WHY (Motivation):**
+- Either girl's vanity on for 15 minutes turned off **both** vanities and Madelyn's desk
+- One person using a light could force the other room off
+
+**WHAT (Solution):**
+- Turn off only the triggered vanity via `trigger.entity_id`
+- Madelyn desk turns off only when Madelyn vanity times out
+- Availability check scoped to the trigger entity
+- `mode: parallel` so both rooms can time out independently
+
+**IMPACT:**
+- File: `automations/lights/maw_law_vanity_off.yaml`
+- Entities: `switch.laurel_vanity`, `switch.madelynvanitylight`, `switch.madelynvanitydesk`
+
+---
+
 ## 2026-07-08 - Simple Wyze Vac Auth / SSL Fix (Issue #20)
 
 ### Fixed - simple_wyze_vac authentication and TLS
