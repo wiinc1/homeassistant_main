@@ -1,63 +1,98 @@
 - id: 'water_leak_detection'
   alias: Water Leak Detection
-  description: 'Notify when water leak is detected with repeat announcements until resolved'
+  description: >-
+    Critical alert when any water leak sensor detects moisture. Sends a high-priority
+    mobile push and double Alexa announce on first detection; repeats Alexa only every
+    5 minutes while any sensor remains wet (no mobile spam).
   trigger:
-    # Initial trigger for leak detection
+    # First detection: group goes wet
     - platform: state
       entity_id: group.water_leak_sensors
       to: 'on'
       from: 'off'
-    # Trigger every minute for repeat announcements
+      id: initial
+    # Reminders while still wet (Alexa only)
     - platform: time_pattern
-      minutes: /1
+      minutes: /5
+      id: repeat
   condition:
     - condition: state
       entity_id: input_boolean.automation_enabled
       state: 'on'
-    # Only run if leak is detected
     - condition: state
       entity_id: group.water_leak_sensors
       state: 'on'
     - condition: template
-      value_template: "{{ not is_state('group.water_leak_sensors', 'unavailable') and not is_state('group.water_leak_sensors', 'unknown') }}"
+      value_template: >
+        {{ not is_state('group.water_leak_sensors', 'unavailable') and
+           not is_state('group.water_leak_sensors', 'unknown') }}
   action:
     - variables:
+        # Entity IDs must match groups.yaml / Zigbee entities (lumi_lumi_..., not lumi_...)
         leak_location: >
-          {% if is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture', 'on') %}
-            Graham's Bathroom
-          {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_2', 'on') %}
-            Kitchen Dishwasher
-          {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_3', 'on') %}
-            Kitchen Sink
-          {% elif is_state('binary_sensor.lumi_sensor_wleak_aq1_moisture_4', 'on') %}
-            Laundry Room
-          {% endif %}
-    # Mobile push notification
-    - service: notify.mobile_app_your_phone_name
-      data:
-        title: "⚠️ WATER LEAK ALERT! ⚠️"
-        message: "Alert! Alert! Alert! Water leaking in {{ leak_location }}!"
-        data:
-          priority: high
-          channel: alarm
-
-    # Initial double Alexa announcement (only on first detection, not on time pattern)
-    - if:
-        - condition: template
-          value_template: "{{ trigger.platform != 'time_pattern' }}"
-      then:
-        - condition: template
-          value_template: >
-            {{ not is_state('group.alexa_devices', 'unavailable') and not is_state('group.alexa_devices', 'unknown') }}
-        - repeat:
-            count: 2
-            sequence:
-              - service: notify.alexa_tts
+          {% set locations = {
+            'binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture': "Graham's Bathroom",
+            'binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_2': 'Kitchen Dishwasher',
+            'binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_3': 'Kitchen Sink',
+            'binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture_4': 'Laundry Room'
+          } %}
+          {% set ns = namespace(active=[]) %}
+          {% for entity, name in locations.items() %}
+            {% if is_state(entity, 'on') %}
+              {% set ns.active = ns.active + [name] %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.active | join(', ') if ns.active else 'an unknown location' }}
+        alert_message: "Alert! Alert! Alert! Water leaking in {{ leak_location }}!"
+    - choose:
+        # Initial detection: mobile + double Alexa
+        - conditions:
+            - condition: trigger
+              id: initial
+          sequence:
+            - service: notify.mobile_app_brians_iphone
+              data:
+                title: "WATER LEAK ALERT"
+                message: "{{ alert_message }}"
                 data:
-                  target: group.alexa_devices
-                  message: "Alert! Alert! Alert! Water leaking in {{ leak_location }}!"
+                  priority: high
+                  channel: alarm
+                  ttl: 0
+                  importance: high
+            - if:
+                - condition: template
+                  value_template: >
+                    {{ not is_state('group.alexa_devices', 'unavailable') and
+                       not is_state('group.alexa_devices', 'unknown') }}
+              then:
+                - repeat:
+                    count: 2
+                    sequence:
+                      - service: notify.alexa_tts
+                        data:
+                          target: group.alexa_devices
+                          message: "{{ alert_message }}"
+                          data:
+                            type: announce
+                            method: all
+                      - delay: '00:00:03'
+        # Still wet: Alexa reminder only (every 5 minutes via time_pattern)
+        - conditions:
+            - condition: trigger
+              id: repeat
+          sequence:
+            - if:
+                - condition: template
+                  value_template: >
+                    {{ not is_state('group.alexa_devices', 'unavailable') and
+                       not is_state('group.alexa_devices', 'unknown') }}
+              then:
+                - service: notify.alexa_tts
                   data:
-                    type: announce
-                    method: all
-              - delay: '00:00:03'  # 3 second delay between initial announcements
-  mode: restart
+                    target: group.alexa_devices
+                    message: "{{ alert_message }}"
+                    data:
+                      type: announce
+                      method: all
+  mode: single
+  max_exceeded: silent

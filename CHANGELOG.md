@@ -4,6 +4,28 @@ See [CHANGELOG_TEMPLATE.md](CHANGELOG_TEMPLATE.md) for entry format guidelines.
 
 ---
 
+## 2026-07-08 - Water Leak Detection Fixes (Issue #46)
+
+### Fixed - Water Leak Detection Notify
+
+**WHY (Motivation):**
+- Location template used wrong entity IDs (`lumi_sensor_*` vs real `lumi_lumi_sensor_*`) so leak location was empty
+- Mobile notify targeted placeholder `notify.mobile_app_your_phone_name` (no delivery)
+- Time pattern every minute re-sent mobile push while only Alexa was gated to first detection
+
+**WHAT (Solution):**
+- Map all four moisture sensors to locations matching `groups.yaml`
+- Support multiple simultaneous wet sensors (comma-joined locations)
+- Initial detection: high-priority `notify.mobile_app_brians_iphone` + double Alexa announce
+- While still wet: Alexa-only reminder every 5 minutes (no mobile spam)
+- `mode: single` with `max_exceeded: silent`
+
+**IMPACT:**
+- File: `automations/notifications/water_leak_detection_notify.yaml`
+- Entities: `group.water_leak_sensors`, four `binary_sensor.lumi_lumi_sensor_wleak_aq1_moisture*`
+
+---
+
 ## 2026-07-08 - Garage Hallway Timer Redesign (Issue #40)
 
 ### Changed - Garage Hallway Motion Lighting
