@@ -1,6 +1,8 @@
 - id: '1696381624866'
   alias: Lights - Basement Motion
-  description: 'Turns on basement lights when motion is detected, turns off when occupancy clears'
+  description: >-
+    Turns on basement family room and hallway lights on motion. Off is handled
+    by occupancy clear (Lights - Basement Occupancy Clear). Night dimming applies.
   trigger:
     - platform: state
       entity_id:
@@ -11,14 +13,33 @@
     - condition: state
       entity_id: input_boolean.automation_enabled
       state: 'on'
+    # Skip while basement TV is actively playing (either entity id)
     - condition: not
       conditions:
-        - condition: state
-          entity_id: media_player.basement_tv
-          state: 'playing'
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: media_player.basement_tv
+              state: 'playing'
+            - condition: state
+              entity_id: media_player.basement_tv_2
+              state: 'playing'
     - condition: template
-      value_template: "{{ not is_state('binary_sensor.lumi_lumi_motion_ac02_motion', 'unavailable') and not is_state('binary_sensor.lumi_lumi_motion_ac02_motion', 'unknown') }}"
+      value_template: >
+        {{ not is_state('binary_sensor.lumi_lumi_motion_ac02_motion', 'unavailable') and
+           not is_state('binary_sensor.lumi_lumi_motion_ac02_motion', 'unknown') }}
   action:
+    - variables:
+        brightness_pct: >
+          {% if now().hour < 6 %}
+            35
+          {% elif now().hour >= 20 %}
+            70
+          {% elif now().hour < 12 and is_state('sun.sun', 'below_horizon') %}
+            70
+          {% else %}
+            100
+          {% endif %}
     - if:
         - condition: template
           value_template: >
@@ -32,15 +53,8 @@
             entity_id:
               - light.basement_familyroom_light
               - light.basementhallwaylight
-    - if:
-        - condition: state
-          entity_id: binary_sensor.lumi_lumi_motion_ac02_occupancy
-          state: 'off'
-      then:
-        - service: light.turn_off
-          target:
-            entity_id:
-              - light.basement_familyroom_light
-              - light.basementhallwaylight
+          data:
+            brightness_pct: "{{ brightness_pct | int }}"
+            transition: 1
   mode: single
   max_exceeded: silent

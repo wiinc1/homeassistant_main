@@ -1,6 +1,10 @@
 - id: '1695861833625'
-  alias: 'Lights - Basement Motion Activated'
-  description: 'Turns on basement lights when motion is detected after sunset'
+  alias: Lights - Unfinished Basement Motion On
+  description: >-
+    Turns on basement family room, hallway, and storm shelter on unfinished
+    basement motion (evening window). Shared lights are turned off by occupancy
+    clear; a 10-minute restartable timer only force-offs when finished occupancy
+    is already clear (no fight with occupied finished basement).
   trigger:
     - platform: state
       entity_id: switch.unfinished_basement_motion_detection
@@ -13,19 +17,24 @@
     - condition: sun
       after: sunset
     - condition: time
-      after: '06:00:00' 
+      after: '06:00:00'
       before: '23:00:00'
     - condition: template
       value_template: >
         {{ not is_state('switch.unfinished_basement_motion_detection', 'unavailable') and
-           not is_state('switch.unfinished_basement_motion_detection', 'unknown') and
-           not is_state('light.basement_familyroom_light', 'unavailable') and
-           not is_state('light.basement_familyroom_light', 'unknown') and
-           not is_state('light.basementhallwaylight', 'unavailable') and
-           not is_state('light.basementhallwaylight', 'unknown') and
-           not is_state('light.stormshelter', 'unavailable') and
-           not is_state('light.stormshelter', 'unknown') }}
+           not is_state('switch.unfinished_basement_motion_detection', 'unknown') }}
   action:
+    - variables:
+        brightness_pct: >
+          {% if now().hour < 6 %}
+            35
+          {% elif now().hour >= 20 %}
+            70
+          {% elif now().hour < 12 and is_state('sun.sun', 'below_horizon') %}
+            70
+          {% else %}
+            100
+          {% endif %}
     - service: light.turn_on
       target:
         entity_id:
@@ -33,17 +42,40 @@
           - light.basementhallwaylight
           - light.stormshelter
       data:
-        brightness_pct: 100
+        brightness_pct: "{{ brightness_pct | int }}"
         transition: 1
-    - delay:
-        minutes: 10
-    - service: light.turn_off
+      continue_on_error: true
+    - service: timer.start
+      target:
+        entity_id: timer.basement_unfinished_lights
+  mode: single
+  max_exceeded: silent
+
+- id: 'basement_unfinished_timer_off'
+  alias: Lights - Unfinished Basement Timer Off
+  description: >-
+    When unfinished basement timer finishes, turn lights off only if finished
+    basement occupancy is clear (does not kill lights while someone is still
+    in the finished basement).
+  trigger:
+    - platform: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.basement_unfinished_lights
+  condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.lumi_lumi_motion_ac02_occupancy
+      state: 'off'
+  action:
+    - service: homeassistant.turn_off
       target:
         entity_id:
           - light.basement_familyroom_light
           - light.basementhallwaylight
           - light.stormshelter
-      data:
-        transition: 2
+      continue_on_error: true
   mode: single
   max_exceeded: silent
