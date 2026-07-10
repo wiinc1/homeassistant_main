@@ -1,0 +1,33 @@
+- id: '1696433765543'
+  alias: Lights - Basement Occupancy Clear
+  description: >-
+    Primary off path for basement lights: turns off family room, hallway, and
+    storm shelter when finished-basement occupancy clears.
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.lumi_lumi_motion_ac02_occupancy
+      from: 'on'
+      to: 'off'
+  condition:
+    - condition: state
+      entity_id: input_boolean.automation_enabled
+      state: 'on'
+    - condition: template
+      value_template: >
+        {{ not is_state('binary_sensor.lumi_lumi_motion_ac02_occupancy', 'unavailable') and
+           not is_state('binary_sensor.lumi_lumi_motion_ac02_occupancy', 'unknown') }}
+  action:
+    - service: homeassistant.turn_off
+      target:
+        entity_id:
+          - light.basementhallwaylight
+          - light.basement_familyroom_light
+          - light.stormshelter
+      continue_on_error: true
+    - service: timer.cancel
+      target:
+        entity_id: timer.basement_unfinished_lights
+      continue_on_error: true
+  mode: single
+  max_exceeded: silent

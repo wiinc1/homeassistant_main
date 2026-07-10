@@ -4,6 +4,28 @@ See [CHANGELOG_TEMPLATE.md](CHANGELOG_TEMPLATE.md) for entry format guidelines.
 
 ---
 
+## 2026-07-08 - Basement Lights Occupancy Redesign (Issue #43)
+
+### Changed - Basement Motion / Occupancy / Unfinished
+
+**WHY (Motivation):**
+- Finished basement motion turned lights on then immediately off if occupancy was still `off` (race)
+- Unfinished 10-minute delay force-off competed with occupancy while finished basement was still occupied
+- `mode: single` dropped re-motion during unfinished delay; no night dimming
+
+**WHAT (Solution):**
+- **On only:** finished motion and unfinished motion turn lights on with night dimming (35% overnight, 70% evening/pre-sunrise, 100% day)
+- **Occupancy owns off:** occupancy clear turns off family room, hallway, and storm shelter; cancels unfinished timer
+- **Unfinished timer:** `timer.basement_unfinished_lights` (10 min, restartable); timer finished only force-offs if finished occupancy is already clear
+- Renamed typo file `occupany` → `occupancy` (automation id unchanged)
+- TV playing check covers `media_player.basement_tv` and `basement_tv_2`
+
+**IMPACT:**
+- Files: `basement_motion.yaml`, `basement_lights_off_occupancy_clear.yaml`, `unfinished_basement_motion_lights_on.yaml`, `packages/helpers.yaml`
+- New helper: `timer.basement_unfinished_lights`
+
+---
+
 ## 2026-07-08 - Vanity Auto-Off Isolation (Issue #44)
 
 ### Fixed - Madelyn & Laurel Vanity Off Coupling
