@@ -3,6 +3,8 @@
   description: >-
     Turns off garage hallway and laundry lights when the garage hallway timer
     finishes (5 minutes after the last motion-triggered start/restart).
+    Each target is turned off separately so unavailable light.garage_hallway
+    cannot prevent laundry from turning off.
   trigger:
     - platform: event
       event_type: timer.finished
@@ -13,15 +15,23 @@
       entity_id: input_boolean.automation_enabled
       state: 'on'
   action:
+    # Working fixture first
     - service: light.turn_off
       target:
-        entity_id:
-          - light.garage_hallway
-          - light.garage_hallway_2
+        entity_id: light.garage_hallway_2
       data:
         transition: 1
+      continue_on_error: true
+    # Unavailable orphan — must not block laundry
+    - service: light.turn_off
+      target:
+        entity_id: light.garage_hallway
+      data:
+        transition: 1
+      continue_on_error: true
     - service: switch.turn_off
       target:
         entity_id: switch.laundryroom
+      continue_on_error: true
   mode: single
   max_exceeded: silent
