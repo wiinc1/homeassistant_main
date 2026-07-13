@@ -4,6 +4,24 @@ See [CHANGELOG_TEMPLATE.md](CHANGELOG_TEMPLATE.md) for entry format guidelines.
 
 ---
 
+## 2026-07-12 - Garage Hallway Laundry Off Reliability
+
+### Fixed - Laundry Switch Not Always Turning Off With Hallway
+
+**WHY (Motivation):**
+- Timer off targeted unavailable `light.garage_hallway` together with the working fixture
+- Logs warned about missing `light.garage_hallway`; laundry (`switch.laundryroom`) could remain on after hallway went off
+
+**WHAT (Solution):**
+- Call each light and laundry switch separately with `continue_on_error: true`
+- Prefer `light.garage_hallway_2` (working fixture) before the unavailable orphan entity
+- Same pattern on motion-on so laundry + timer always run even if one light fails
+
+**IMPACT:**
+- Files: `automations/lights/garage_hallway_motion_on.yaml`, `garage_hallway_motion_off.yaml`
+
+---
+
 ## 2026-07-08 - Basement Lights Occupancy Redesign (Issue #43)
 
 ### Changed - Basement Motion / Occupancy / Unfinished
